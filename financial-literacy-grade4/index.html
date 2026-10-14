@@ -1,0 +1,1007 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>حصّالة المعرفة</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&family=Readex+Pro:wght@300;400;600;700&display=swap">
+<style>
+/* Layout: a classroom "money notebook" — header band with coin counter, a scrollable tab rail, one content column (max 1100px); worksheets are styled as printable paper sheets */
+:root{
+  --paper:#F1F6F2; --card:#FFFFFF; --ink:#16362F; --muted:#5A7069; --line:#D2E1D8;
+  --mint:#1D8456; --mint-soft:#DCEFE3; --coin:#C98B06; --coin-bright:#F2B92C; --coin-soft:#FBEFCC;
+  --berry:#BC4239; --berry-soft:#F8E1DE; --sky:#2B6CA3; --sky-soft:#DDEAF5; --on-accent:#FFFFFF;
+  --f-display:"Lalezar","Readex Pro",Tahoma,system-ui,sans-serif;
+  --f-body:"Readex Pro","Segoe UI",Tahoma,system-ui,sans-serif;
+  --r:14px; --shadow:0 2px 0 var(--line);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1D1A; --card:#162925; --ink:#E2EEE8; --muted:#9BB3AA; --line:#2A403A;
+    --mint:#4CC38A; --mint-soft:#1C3A2E; --coin:#F0B93A; --coin-bright:#F2B92C; --coin-soft:#3A3018;
+    --berry:#EF7D73; --berry-soft:#3D2220; --sky:#76AEE0; --sky-soft:#1C2E40; --on-accent:#0F1D1A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1D1A; --card:#162925; --ink:#E2EEE8; --muted:#9BB3AA; --line:#2A403A;
+  --mint:#4CC38A; --mint-soft:#1C3A2E; --coin:#F0B93A; --coin-bright:#F2B92C; --coin-soft:#3A3018;
+  --berry:#EF7D73; --berry-soft:#3D2220; --sky:#76AEE0; --sky-soft:#1C2E40; --on-accent:#0F1D1A;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--paper);color:var(--ink)}
+body{margin:0;font-family:var(--f-body);font-size:16px;line-height:1.75}
+#app{direction:rtl;text-align:right}
+.wrap{max-width:1100px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;line-height:1.3;text-wrap:balance;margin:0}
+h2{font-size:1.9rem} h3{font-size:1.35rem}
+p{margin:0}
+button,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--coin-bright);outline-offset:2px;border-radius:8px}
+
+/* header */
+.top{background:var(--mint);color:var(--on-accent);position:sticky;top:env(safe-area-inset-top, 0px);z-index:10}
+.top .wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-block:10px}
+.brand{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;background:none;border:0;padding:0;text-align:right;color:inherit}
+.brand .coinlogo{width:42px;height:42px;flex:none}
+.brand h1{font-size:1.7rem;color:inherit}
+.brand small{display:block;font-size:.78rem;opacity:.9;font-family:var(--f-body)}
+.wallet{display:flex;align-items:center;gap:6px;background:var(--coin-soft);color:var(--ink);border-radius:999px;padding:4px 12px 4px 6px;font-weight:700;font-variant-numeric:tabular-nums}
+.wallet .c{width:24px;height:24px;border-radius:50%;background:var(--coin-bright);border:2px solid var(--coin);display:grid;place-items:center;font-size:.7rem;color:#5A3E00}
+.cur{display:flex;align-items:center;gap:6px;font-size:.85rem}
+.cur select{background:var(--card);color:var(--ink);border:0;border-radius:8px;padding:4px 6px}
+.rail{background:var(--card);border-bottom:1px solid var(--line)}
+.rail .wrap{display:flex;gap:6px;overflow-x:auto;padding-block:8px;scrollbar-width:thin}
+.rail button{white-space:nowrap;border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:5px 14px;font-size:.9rem}
+.rail button[aria-current="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+main .wrap{padding-block:24px 64px;display:grid;gap:24px}
+
+/* home */
+.hero{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;align-items:center}
+.hero h2{font-size:2.4rem}
+.hero p{color:var(--muted);max-width:60ch;margin-top:8px}
+.hero .stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--mint-soft);color:var(--ink);border-radius:999px;padding:3px 12px;font-size:.85rem}
+.chip.gold{background:var(--coin-soft)} .chip.red{background:var(--berry-soft)} .chip.blue{background:var(--sky-soft)}
+.jar{width:100%;max-width:300px;justify-self:center}
+.lessons{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.lcard{display:grid;grid-template-rows:auto auto 1fr auto;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;text-align:right;transition:transform .15s}
+.lcard:hover{transform:translateY(-3px)}
+.lnum{width:52px;height:52px;border-radius:50%;background:var(--coin-bright);border:3px solid var(--coin);box-shadow:inset 0 0 0 3px rgba(255,255,255,.35);display:grid;place-items:center;font-family:var(--f-display);font-size:1.5rem;color:#4A3300}
+.lcard h3{font-size:1.3rem}
+.lcard p{color:var(--muted);font-size:.92rem}
+.lcard .tags{display:flex;flex-wrap:wrap;gap:6px}
+.lcard .tags .chip{font-size:.75rem}
+
+/* lesson */
+.lhead{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.lhead .lnum{width:64px;height:64px;font-size:1.9rem}
+.lhead div{min-width:0;flex:1}
+.lhead p{color:var(--muted)}
+.subtabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:2px solid var(--line);padding-bottom:8px}
+.subtabs button{border:0;background:none;padding:6px 12px;border-radius:10px;font-weight:600;color:var(--muted)}
+.subtabs button[aria-selected="true"]{background:var(--mint);color:var(--on-accent)}
+.panel{display:grid;gap:18px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.box h3{margin-bottom:8px}
+.goals{display:grid;gap:6px;padding:0;margin:0;list-style:none}
+.goals li{padding-right:28px;position:relative}
+.goals li::before{content:"";position:absolute;right:4px;top:.6em;width:12px;height:12px;border-radius:50%;background:var(--coin-bright);border:2px solid var(--coin)}
+
+/* flip cards */
+.terms{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
+.flip{perspective:900px;border:0;background:none;padding:0;min-height:150px;text-align:center}
+.flip .in{position:relative;width:100%;height:100%;min-height:150px;transition:transform .5s;transform-style:preserve-3d}
+.flip.on .in{transform:rotateY(180deg)}
+.flip .f,.flip .b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--r);display:grid;place-items:center;padding:14px}
+.flip .f{background:var(--mint-soft);border:2px dashed var(--mint)}
+.flip .f strong{font-family:var(--f-display);font-size:1.6rem;font-weight:400;display:block}
+.flip .f span{font-size:.75rem;color:var(--muted)}
+.flip .b{background:var(--card);border:2px solid var(--coin);transform:rotateY(180deg);font-size:.92rem;line-height:1.6}
+
+/* slides */
+.deck{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.slide{aspect-ratio:16/9;max-width:100%;display:grid;grid-template-columns:1fr 1.6fr;align-items:center;gap:24px;padding:4% 6%;background:linear-gradient(160deg,var(--mint-soft),var(--card) 60%)}
+.slide .pic{font-size:clamp(3rem,11vw,8rem);text-align:center;line-height:1.1}
+.slide h3{font-size:clamp(1.3rem,3.4vw,2.4rem);margin-bottom:10px}
+.slide ul{margin:0;padding-right:20px;display:grid;gap:4px;font-size:clamp(.85rem,1.9vw,1.25rem)}
+.slide .tag{display:inline-block;font-size:.8rem;background:var(--coin-soft);border-radius:999px;padding:0 10px;margin-bottom:6px}
+.deck:fullscreen{display:grid;place-items:center;background:var(--paper)}
+.deck:fullscreen .slide{width:min(100vw,177vh)}
+.deckbar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--line);flex-wrap:wrap}
+.deckbar .dots{display:flex;gap:5px;flex:1;flex-wrap:wrap}
+.deckbar .dots i{width:9px;height:9px;border-radius:50%;background:var(--line)}
+.deckbar .dots i.on{background:var(--mint)}
+.btn{border:0;border-radius:10px;padding:8px 16px;background:var(--mint);color:var(--on-accent);font-weight:600}
+.btn.ghost{background:var(--paper);color:var(--ink);border:1px solid var(--line)}
+.btn.gold{background:var(--coin-bright);color:#3B2900}
+.btn:disabled{opacity:.45;cursor:default}
+.note{font-size:.88rem;color:var(--muted);background:var(--sky-soft);border-radius:10px;padding:10px 14px}
+
+/* activity */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.steps{margin:0;padding-right:22px;display:grid;gap:6px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+
+/* worksheet = paper */
+.sheet{background:#FFFFFF;color:#1B2B27;border:1px solid var(--line);border-radius:6px;padding:28px 32px;box-shadow:0 6px 0 -3px var(--line);max-width:820px;width:100%;justify-self:center}
+.sheet h3{font-size:1.5rem;color:#1D8456;text-align:center}
+.sheet .who{display:flex;gap:18px;flex-wrap:wrap;margin:12px 0 18px;font-size:.92rem}
+.sheet .who span{flex:1;min-width:140px;border-bottom:1px dotted #8AA39B;padding-bottom:2px}
+.sheet section{margin-top:20px}
+.sheet h4{margin:0 0 8px;font-size:1.05rem;display:flex;gap:8px;align-items:center}
+.sheet h4 b{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#F2B92C;color:#3B2900;font-size:.85rem;flex:none}
+.sheet .row{display:flex;gap:10px;align-items:baseline;padding:4px 0;flex-wrap:wrap}
+.sheet .blank{display:inline-block;min-width:90px;border-bottom:1.5px solid #8AA39B;text-align:center}
+.sheet .sq{display:inline-grid;place-items:center;width:30px;height:26px;border:1.5px solid #8AA39B;border-radius:5px;flex:none}
+.sheet .line{border-bottom:1px solid #B9CCC4;height:30px}
+.sheet .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sheet .bank{display:flex;flex-wrap:wrap;gap:6px;border:1.5px dashed #8AA39B;border-radius:8px;padding:8px;margin-bottom:10px}
+.sheet .bank span{background:#EEF5F0;border-radius:6px;padding:0 8px}
+.sheet .bin{border:1.5px solid #8AA39B;border-radius:8px;min-height:120px;padding:6px 10px}
+.sheet .bin b{display:block;text-align:center;border-bottom:1px solid #B9CCC4;margin-bottom:4px}
+.sheet .drawbox{border:1.5px dashed #8AA39B;border-radius:8px;min-height:140px;padding:6px;font-size:.85rem;color:#5A7069}
+.sheet table{width:100%;border-collapse:collapse;font-size:.92rem}
+.sheet td,.sheet th{border:1px solid #9DB5AC;padding:6px 8px;text-align:center}
+.sheet th{background:#DCEFE3}
+.sheet .ans{display:none;color:#BC4239;font-weight:700}
+.sheet.key .ans{display:inline}
+.sheet .tablewrap{overflow-x:auto}
+.sheettools{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+
+/* games */
+.game{display:grid;gap:14px}
+.game .instr{color:var(--muted)}
+.score{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-variant-numeric:tabular-nums}
+.pool{display:flex;flex-wrap:wrap;gap:8px}
+.tile{border:2px solid var(--line);background:var(--card);border-radius:12px;padding:10px 14px;text-align:right;font-weight:600}
+.tile:hover{border-color:var(--mint)}
+.tile.done{background:var(--mint-soft);border-color:var(--mint);cursor:default}
+.tile.bad{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.track{display:grid;gap:6px;counter-reset:n}
+.track .tile{counter-increment:n;display:flex;gap:10px;align-items:center}
+.track .tile::before{content:counter(n);width:28px;height:28px;border-radius:50%;background:var(--coin-bright);color:#3B2900;display:grid;place-items:center;flex:none}
+.bigcard{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:22px;text-align:center;display:grid;gap:12px;justify-items:center}
+.bigcard .pic{font-size:3.6rem;line-height:1.1}
+.bigcard .q{font-size:1.3rem;font-weight:700}
+.choices{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.choices .btn{min-width:140px;padding:12px 18px;font-size:1.05rem}
+.choices .btn.red{background:var(--berry)}
+.choices .btn.blue{background:var(--sky)}
+.opts{display:grid;gap:8px;width:100%;max-width:560px}
+.opt{border:2px solid var(--line);background:var(--card);border-radius:12px;padding:10px 14px;text-align:right}
+.opt:hover:not(:disabled){border-color:var(--sky)}
+.opt.right{border-color:var(--mint);background:var(--mint-soft)}
+.opt.wrong{border-color:var(--berry);background:var(--berry-soft)}
+.fb{border-radius:12px;padding:10px 14px;width:100%;max-width:560px;text-align:right}
+.fb.ok{background:var(--mint-soft)} .fb.no{background:var(--berry-soft)}
+.bar{height:16px;border-radius:999px;background:var(--line);overflow:hidden;width:100%}
+.bar i{display:block;height:100%;background:var(--mint);transition:width .4s}
+.bar.over i{background:var(--berry)}
+.blist{display:grid;gap:8px}
+.bitem{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+.bitem input{width:22px;height:22px;accent-color:var(--mint);flex:none}
+.bitem label{flex:1;min-width:0;cursor:pointer}
+.bitem .p{font-variant-numeric:tabular-nums;font-weight:700}
+.sim{display:grid;grid-template-columns:200px 1fr;gap:20px;align-items:center}
+.sjar{position:relative;width:160px;height:200px;border:4px solid var(--ink);border-top-width:10px;border-radius:24px 24px 34px 34px;overflow:hidden;justify-self:center;background:var(--card)}
+.sjar i{position:absolute;bottom:0;left:0;right:0;background:repeating-linear-gradient(0deg,var(--coin-bright) 0 12px,var(--coin) 12px 14px);transition:height .5s}
+.sjar b{position:absolute;inset:0;display:grid;place-items:center;font-size:1.4rem;color:var(--ink);text-shadow:0 0 6px var(--card)}
+.log{display:grid;gap:4px;font-size:.9rem;max-height:180px;overflow:auto}
+.mem{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.mcard{min-height:110px;border-radius:12px;border:2px solid var(--line);background:var(--mint);color:var(--on-accent);font-family:var(--f-display);font-size:2rem;padding:8px}
+.mcard.open{background:var(--card);color:var(--ink);font-family:var(--f-body);font-size:.85rem;line-height:1.45}
+.mcard.open.t{font-family:var(--f-display);font-size:1.3rem}
+.mcard.got{background:var(--mint-soft);color:var(--ink);border-color:var(--mint);font-family:var(--f-body);font-size:.85rem}
+.mcard.got.t{font-family:var(--f-display);font-size:1.3rem}
+
+/* riddles */
+.riddles{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.riddle{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:10px;align-content:start}
+.riddle .q{font-size:1.05rem}
+.riddle .q::before{content:"؟";font-family:var(--f-display);font-size:1.8rem;color:var(--coin);float:right;margin-left:10px;line-height:1}
+.riddle .a{background:var(--coin-soft);border-radius:10px;padding:8px 12px;font-weight:700}
+.riddle .h{font-size:.88rem;color:var(--muted)}
+.riddle .acts{display:flex;gap:8px;flex-wrap:wrap}
+
+/* glossary & guide */
+.gloss{display:grid;gap:8px}
+.gloss .g{display:grid;grid-template-columns:170px 1fr auto;gap:12px;align-items:baseline;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.gloss .g b{font-family:var(--f-display);font-weight:400;font-size:1.25rem;color:var(--mint)}
+.gloss .g span{min-width:0}
+.gloss input{width:100%;max-width:420px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit}
+.tw{overflow-x:auto}
+table.plan{width:100%;border-collapse:collapse;background:var(--card);border-radius:12px;overflow:hidden;font-size:.93rem}
+table.plan th,table.plan td{border-bottom:1px solid var(--line);padding:10px;text-align:right;vertical-align:top}
+table.plan th{background:var(--mint-soft)}
+.toast{position:fixed;left:max(16px, env(safe-area-inset-left, 0px));bottom:calc(16px + env(safe-area-inset-bottom, 0px));background:var(--ink);color:var(--paper);border-radius:12px;padding:10px 16px;font-weight:600;z-index:50;transition:opacity .3s,transform .3s}
+.toast[hidden]{display:none!important}
+
+@media (max-width:760px){
+  .hero,.cols,.sim{grid-template-columns:1fr}
+  .slide{grid-template-columns:1fr;aspect-ratio:auto;gap:8px;padding:20px}
+  .slide .pic{font-size:3.4rem}
+  .gloss .g{grid-template-columns:1fr}
+  .mem{grid-template-columns:repeat(3,1fr)}
+  .sheet{padding:18px 16px}
+  .sheet .grid2{grid-template-columns:1fr}
+  h2{font-size:1.6rem} .hero h2{font-size:1.9rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media print{
+  .top,.rail,.subtabs,.lhead,.sheettools,.toast,.noprint{display:none!important}
+  body,html{background:#fff}
+  main .wrap{padding:0}
+  .sheet{border:0;box-shadow:none;max-width:none;padding:0}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="wrap">
+      <button class="brand" id="homeBtn" aria-label="الصفحة الرئيسية">
+        <svg class="coinlogo" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="21" fill="#F2B92C" stroke="#C98B06" stroke-width="4"/><circle cx="24" cy="24" r="14" fill="none" stroke="#C98B06" stroke-width="2" stroke-dasharray="3 3"/><text x="24" y="31" text-anchor="middle" font-size="18" font-family="Lalezar, sans-serif" fill="#5A3E00">ح</text></svg>
+        <span><h1>حصّالة المعرفة</h1><small>سلسلة دروس الإدارة المالية · الصف الرابع</small></span>
+      </button>
+      <label class="cur">العملة
+        <select id="curSel">
+          <option value="شيكل">شيكل ₪</option>
+          <option value="دينار">دينار</option>
+          <option value="درهم">درهم</option>
+          <option value="ريال">ريال</option>
+          <option value="جنيه">جنيه</option>
+          <option value="ليرة">ليرة</option>
+        </select>
+      </label>
+      <div class="wallet" title="القطع الذهبية التي جمعتها في الألعاب"><span class="c">$</span><span id="coins">0</span> قطعة ذهبية</div>
+    </div>
+  </header>
+  <nav class="rail" aria-label="التنقل"><div class="wrap" id="rail"></div></nav>
+  <main><div class="wrap" id="view"></div></main>
+  <div class="toast" id="toast" hidden></div>
+</div>
+
+<script>
+document.documentElement.lang = 'ar';
+document.documentElement.dir = 'rtl';
+
+/* ======================= المحتوى ======================= */
+const LESSONS = [
+{
+  id:1, title:'رحلة المال', sub:'من المقايضة إلى البطاقة البنكية',
+  intro:'كيف كان الناس يشترون قبل اختراع النقود؟ نسافر عبر الزمن ونكتشف لماذا اخترع الإنسان المال.',
+  goals:['أن يعرّف الطالب المال ويذكر وظائفه الثلاث.','أن يشرح المقايضة ويذكر صعوبتين فيها.','أن يرتّب مراحل تطوّر المال من الأقدم إلى الأحدث.','أن يميّز بين السلعة والخدمة.'],
+  terms:[
+    ['المال','كل شيء يتفق الناس على استخدامه لشراء السلع والخدمات.'],
+    ['المقايضة','تبادل سلعة بسلعة أو خدمة بخدمة دون استخدام المال.'],
+    ['العملة المعدنية','قطعة نقود صغيرة مصنوعة من المعدن.'],
+    ['الورقة النقدية','نقود مطبوعة على ورق خاص يصعب تزويره.'],
+    ['البطاقة البنكية','بطاقة ندفع بها من حسابنا في البنك دون حمل نقود.'],
+    ['السلعة','شيء نلمسه ونشتريه، مثل التفاحة والقلم والحذاء.'],
+    ['الخدمة','عمل يقوم به شخص من أجلنا، مثل قصّ الشعر وعلاج الطبيب.']
+  ],
+  slides:[
+    {pic:'🤔',tag:'سؤال البداية',h:'تخيّل عالمًا بلا نقود!',p:['تريد حذاءً جديدًا… ولا يوجد مال في العالم.','ماذا ستعطي البائع مقابل الحذاء؟','فكّروا مع زميلكم لمدة دقيقة.']},
+    {pic:'🌾🔁🐟',tag:'قديمًا',h:'المقايضة',p:['مزارع عنده قمح ويريد سمكًا.','صياد عنده سمك ويريد قمحًا.','يتبادلان: قمح مقابل سمك. هذه هي المقايضة!']},
+    {pic:'🐄❓🥚',tag:'مشكلة',h:'صعوبات المقايضة',p:['ماذا لو كان الصياد لا يحب القمح؟','كم بيضة تساوي بقرة واحدة؟','لا نستطيع أن نقسم البقرة إلى نصفين لنشتري شيئًا صغيرًا!']},
+    {pic:'🧂🐚',tag:'الحل الأول',h:'أشياء يتفق عليها الجميع',p:['اتفق الناس على أشياء يقبلها الجميع: الملح، الصدف، الحبوب.','صار من السهل أن نشتري ونبيع.','لكنها كانت تتلف أو تضيع بسهولة.']},
+    {pic:'🪙',tag:'تطوّر',h:'العملات المعدنية',p:['صُنعت من الذهب والفضة والنحاس.','لا تتلف، وسهلة العدّ.','عليها رسوم وكتابات تبيّن قيمتها.']},
+    {pic:'💵',tag:'تطوّر',h:'الأوراق النقدية',p:['خفيفة وسهلة الحمل.','تطبعها الدولة على ورق خاص يصعب تزويره.','على كل ورقة رقم يبيّن قيمتها.']},
+    {pic:'💳📱',tag:'اليوم',h:'البطاقات والدفع بالهاتف',p:['ندفع ببطاقة أو بالهاتف دون أن نلمس النقود.','المال موجود، لكنه محفوظ بشكل رقمي في البنك.','تذكّر: المال الرقمي مال حقيقي! يُصرف مثل النقود تمامًا.']},
+    {pic:'🎯',tag:'خلاصة',h:'وظائف المال الثلاث',p:['وسيلة للشراء والبيع.','مقياس لقيمة الأشياء (هذا أغلى من ذاك).','طريقة لحفظ القيمة: نستطيع أن ندّخره لوقت لاحق.']}
+  ],
+  activity:{name:'سوق المقايضة',time:'20 دقيقة',
+    materials:['بطاقات سلع مطبوعة (قلم، تفاحة، كرة، كتاب، شطيرة…) – بطاقة لكل طالب','بطاقة "أمنية" سرية لكل طالب يكتب فيها ما يريد الحصول عليه','نقود ورقية للعب (من ورقة العمل أو مطبوعة)','مؤقت أو ساعة'],
+    steps:['يحصل كل طالب على بطاقة سلعة وبطاقة أمنية سرية.','الجولة الأولى (5 دقائق): يحاول الطلاب الحصول على أمنيتهم بالمقايضة فقط.','نسجّل على اللوح: كم طالبًا حصل على أمنيته؟','الجولة الثانية (5 دقائق): نوزّع نقود اللعب ويصير لكل سلعة سعر. يشتري الطلاب ويبيعون.','نقارن عدد الناجحين في الجولتين.'],
+    discuss:['في أي جولة كان الحصول على الأمنية أسهل؟ لماذا؟','ما الذي أزعجك في جولة المقايضة؟','لو اختفت النقود غدًا، ماذا سيحدث في السوق؟']},
+  worksheet:[
+    {type:'match',title:'صِل المصطلح بمعناه',pairs:[['المقايضة','تبادل سلعة بسلعة دون مال'],['الورقة النقدية','نقود مطبوعة على ورق خاص'],['البطاقة البنكية','ندفع بها من حسابنا في البنك'],['الخدمة','عمل يقوم به شخص من أجلنا']]},
+    {type:'order',title:'رتّب مراحل تطوّر المال من الأقدم (1) إلى الأحدث (5)',items:['المقايضة','الملح والصدف','العملات المعدنية','الأوراق النقدية','البطاقات والدفع بالهاتف']},
+    {type:'tf',title:'ضع ✓ أمام العبارة الصحيحة و ✗ أمام الخاطئة',items:[['في المقايضة نستخدم النقود الورقية.',false],['من صعوبات المقايضة أن الطرف الآخر قد لا يريد سلعتي.',true],['المال الموجود في البطاقة البنكية ليس مالًا حقيقيًا.',false],['قصّ الشعر خدمة، والتفاحة سلعة.',true]]},
+    {type:'classify',title:'صنّف الكلمات: سلعة أم خدمة؟',cols:['سلعة','خدمة'],items:[['حذاء',0],['تصليح سيارة',1],['خبز',0],['درس خصوصي',1],['دفتر',0],['قصّ الشعر',1]]},
+    {type:'open',title:'لماذا الشراء بالمال أسهل من المقايضة؟ اكتب سببين.',lines:3}
+  ],
+  games:[
+    {type:'order',title:'آلة الزمن: رتّب رحلة المال',instr:'اضغط على البطاقات بالترتيب من الأقدم إلى الأحدث.',items:['🌾 المقايضة: قمح مقابل سمك','🧂 الملح والصدف','🪙 العملات المعدنية','💵 الأوراق النقدية','💳 البطاقات والدفع بالهاتف']},
+    {type:'sort',title:'سلعة أم خدمة؟',instr:'اختر الصندوق المناسب لكل بطاقة.',bins:['سلعة 📦','خدمة 🤝'],items:[['🍎','تفاحة',0],['💇','قصّ الشعر',1],['📚','كتاب',0],['🩺','فحص عند الطبيب',1],['⚽','كرة قدم',0],['🚕','رحلة في سيارة أجرة',1],['🧃','عصير',0],['🔧','تصليح دراجة',1]]}
+  ],
+  riddles:[
+    {q:'أنا مستديرة ولامعة، أرنّ في الجيب وأرقص، أشتري لك الحلوى. فمن أنا؟',a:'العملة المعدنية 🪙',h:'تُصنع من المعدن.'},
+    {q:'أنا ورقة، لكن لا يُكتب عليّ الواجب. عليّ صورة ورقم، ويحبني كل الناس. فمن أنا؟',a:'الورقة النقدية 💵',h:'تجدني في المحفظة.'},
+    {q:'استخدمني الناس قبل اختراع النقود: تعطيني قمحًا وأعطيك سمكًا. فمن أنا؟',a:'المقايضة 🔁',h:'تبادل بلا مال.'},
+    {q:'بطاقة صغيرة ليس في داخلها أي نقود، لكنها تستطيع أن تشتري. فمن أنا؟',a:'البطاقة البنكية 💳',h:'مرتبطة بالبنك.'}
+  ]
+},
+{
+  id:2, title:'من أين يأتي المال؟', sub:'الدخل والعمل والربح',
+  intro:'المال لا ينمو على الأشجار! نتعرّف على مصادر الدخل ونكتشف أن وراء كل مبلغ جهدًا ووقتًا.',
+  goals:['أن يعرّف الطالب الدخل ويذكر ثلاثة مصادر له.','أن يربط بين المهنة والخدمة أو السلعة التي تقدّمها.','أن يحسب الربح في مسائل بسيطة.','أن يقدّر قيمة العمل والجهد.'],
+  terms:[
+    ['الدخل','المال الذي يصل إلينا من العمل أو من مصادر أخرى.'],
+    ['الراتب','مال يحصل عليه العامل مقابل عمله، غالبًا كل شهر.'],
+    ['المهنة','العمل الذي يتقنه الشخص ويكسب منه رزقه.'],
+    ['المصروف','مبلغ يعطيه الأهل للطفل ليتعلّم كيف يدير المال.'],
+    ['التكلفة','المال الذي ندفعه لنصنع شيئًا أو نشتريه.'],
+    ['الربح','ما يبقى بعد أن نطرح التكلفة من سعر البيع.']
+  ],
+  slides:[
+    {pic:'🌳💸',tag:'سؤال البداية',h:'هل ينمو المال على الأشجار؟',p:['من أين يحصل أهلك على المال؟','اكتب على ورقة صغيرة ثلاثة أفكار.']},
+    {pic:'👩‍⚕️👨‍🏫👷',tag:'المصدر الأول',h:'العمل والراتب',p:['الطبيبة تعالج المرضى، والمعلّم يعلّم، والعامل يبني.','مقابل عملهم يحصلون على راتب.','الراتب = مال مقابل الوقت والجهد.']},
+    {pic:'🏪',tag:'المصدر الثاني',h:'البيع والربح',p:['صاحب الدكان يشتري البضاعة ثم يبيعها بسعر أعلى.','الفرق بين سعر البيع والتكلفة هو الربح.']},
+    {pic:'🍋🥤',tag:'مثال',h:'كشك العصير',p:['ليمون وسكر وأكواب كلّفت: 10 {c}.','بعت العصير كله بـ 25 {c}.','الربح = 25 − 10 = 15 {c}.']},
+    {pic:'🧒🎁',tag:'الأطفال',h:'دخل الطفل',p:['المصروف من الأهل.','هدايا العيد وأعياد الميلاد.','مكافأة على مساعدة كبيرة (مع موافقة الأهل).']},
+    {pic:'⏰💪',tag:'فكرة مهمة',h:'كل مبلغ له قصة',p:['وراء كل ورقة نقدية ساعات من العمل.','عندما نصرف المال، نصرف جهد شخص ما.','كل مهنة مهمة ومحترمة.']}
+  ],
+  activity:{name:'سوق المهن',time:'20 دقيقة',
+    materials:['بطاقات مهن (طبيب، خبّاز، مزارع، مبرمجة، سائق، معلّمة، نجّار، ممرّض)','قبعات أو شارات بسيطة للعب الأدوار','نقود ورقية للعب'],
+    steps:['نقسّم الصف إلى مجموعات، وتسحب كل مجموعة بطاقة مهنة.','تحضّر المجموعة عرضًا قصيرًا (دقيقة واحدة): ماذا نعمل؟ ماذا نقدّم للناس؟ ما الأدوات التي نحتاجها؟','بقية الصف يخمّن المهنة، ثم "يدفع" للمجموعة مقابل خدمتها.','واجب بيتي: مقابلة قصيرة مع أحد أفراد العائلة عن عمله (3 أسئلة).'],
+    discuss:['ماذا يحدث لو لم يكن هناك خبّاز في البلد؟','هل يحصل كل الناس على نفس الدخل؟ لماذا برأيك؟','ما المهنة التي تحلم بها؟ ماذا ستقدّم للناس؟']},
+  worksheet:[
+    {type:'table',title:'أكمل الجدول',head:['المهنة','ماذا تقدّم للناس؟','سلعة أم خدمة؟'],rows:[['الخبّاز','',''],['الطبيبة','',''],['المزارع','',''],['السائق','','']],ans:'الخبّاز: خبز – سلعة · الطبيبة: علاج – خدمة · المزارع: خضار وفواكه – سلعة · السائق: توصيل – خدمة'},
+    {type:'calc',title:'احسب الربح',items:[['صنعت سارة أساور بتكلفة 12 {c} وباعتها بـ 30 {c}. كم ربحت؟','18 {c}'],['اشترى يوسف مكوّنات كعك بـ 20 {c} وباعه بـ 45 {c}. كم ربح؟','25 {c}'],['كلّف كشك العصير 15 {c}، وباعت ليلى عصيرًا بـ 15 {c} فقط. كم ربحت؟','0 – لم تربح شيئًا']]},
+    {type:'fill',title:'املأ الفراغ بالكلمة المناسبة',bank:['الراتب','المصروف','الدخل','الربح'],items:[['المال الذي يصل إلينا يسمّى ','الدخل','.'],['يحصل العامل على ','الراتب',' مقابل عمله.'],['يعطيني أهلي ','المصروف',' كل أسبوع.'],['سعر البيع ناقص التكلفة يساوي ','الربح','.']]},
+    {type:'open',title:'مقابلتي: اسأل أحد أفراد عائلتك: ما عملك؟ ماذا تحب فيه؟ ما الصعب فيه؟',lines:4}
+  ],
+  games:[
+    {type:'quiz',title:'من أين جاء المال؟',instr:'اختر الإجابة الصحيحة.',qs:[
+      {q:'الطبيبة تحصل على المال مقابل…',o:['علاج المرضى','اللعب في الحديقة','النوم مبكرًا'],a:0,ex:'الطبيبة تقدّم خدمة العلاج وتحصل على راتب.'},
+      {q:'أيّ من هذه ليس مصدر دخل للطفل؟',o:['المصروف','هدية العيد','إعلان في التلفاز'],a:2,ex:'الإعلان يحاول أن يأخذ مالك، لا أن يعطيك!'},
+      {q:'الخبّاز يبيع…',o:['خدمة','سلعة','لا شيء'],a:1,ex:'الخبز سلعة نلمسها ونأكلها.'},
+      {q:'المال الذي يحصل عليه العامل كل شهر اسمه…',o:['الربح','الراتب','الفاتورة'],a:1,ex:'الراتب مقابل العمل.'}
+    ]},
+    {type:'quiz',title:'تحدّي كشك العصير: احسب الربح',instr:'سعر البيع − التكلفة = الربح',qs:[
+      {q:'التكلفة 8 {c}، سعر البيع 20 {c}. كم الربح؟',o:['12 {c}','28 {c}','8 {c}'],a:0,ex:'20 − 8 = 12'},
+      {q:'التكلفة 15 {c}، سعر البيع 40 {c}. كم الربح؟',o:['55 {c}','25 {c}','15 {c}'],a:1,ex:'40 − 15 = 25'},
+      {q:'التكلفة 30 {c}، سعر البيع 30 {c}. كم الربح؟',o:['30 {c}','60 {c}','0 {c}'],a:2,ex:'30 − 30 = 0، لا ربح ولا خسارة.'},
+      {q:'بعت 5 أكواب كل كوب بـ 4 {c}، والتكلفة 9 {c}. كم الربح؟',o:['11 {c}','20 {c}','5 {c}'],a:0,ex:'5 × 4 = 20، ثم 20 − 9 = 11'}
+    ]}
+  ],
+  riddles:[
+    {q:'أصل في آخر كل شهر لمن يعمل بجدّ. فمن أنا؟',a:'الراتب 💰',h:'يحصل عليه العامل.'},
+    {q:'أنا ما يبقى معك بعد أن تطرح التكلفة من سعر البيع. فمن أنا؟',a:'الربح 📈',h:'كل بائع يتمنّاني.'},
+    {q:'يعطيك إياه أهلك كل أسبوع لتتعلّم كيف تتصرّف بالمال. فمن أنا؟',a:'المصروف 👛',h:'يبدأ بحرف الميم.'},
+    {q:'حزّورة حسابية: اشترى سامي ليمونًا وسكرًا بـ 10 {c}، وباع العصير بـ 25 {c}. كم ربح؟',a:'15 {c} 🍋',h:'25 ناقص 10.'}
+  ]
+},
+{
+  id:3, title:'حاجة أم رغبة؟', sub:'كيف نختار بحكمة',
+  intro:'المال محدود والأمنيات كثيرة. نتعلّم أن نفرّق بين ما نحتاجه وما نرغب فيه، وأن لكل اختيار ثمنًا.',
+  goals:['أن يميّز الطالب بين الحاجة والرغبة.','أن يصنّف أشياء من حياته اليومية.','أن يشرح أن الشيء نفسه قد يكون حاجة أو رغبة حسب الموقف.','أن يفهم أن كل اختيار يعني التنازل عن شيء آخر.'],
+  terms:[
+    ['الحاجة','شيء لا نستطيع العيش بشكل سليم بدونه، مثل الطعام والماء والمسكن.'],
+    ['الرغبة','شيء نحبه ونتمناه، لكننا نستطيع العيش بدونه.'],
+    ['الأولوية','الشيء الأهم الذي نقدّمه على غيره.'],
+    ['القرار المالي','اختيار نقوم به عندما نقرّر كيف نستخدم مالنا.'],
+    ['ثمن الاختيار','الشيء الذي نتنازل عنه عندما نختار شيئًا آخر.']
+  ],
+  slides:[
+    {pic:'🍞🎮',tag:'سؤال البداية',h:'أيهما أهم؟',p:['رغيف خبز أم لعبة إلكترونية؟','لماذا اخترت هذا؟ ناقش زميلك.']},
+    {pic:'🏠💧🍎',tag:'تعريف',h:'الحاجات',p:['أشياء لا نستطيع العيش بشكل سليم بدونها.','طعام، ماء، مسكن، ملابس، دواء، تعليم.']},
+    {pic:'🧸🍦🎧',tag:'تعريف',h:'الرغبات',p:['أشياء نحبها ونتمناها.','تجعلنا سعداء، لكننا نعيش بدونها.','لعبة جديدة، بوظة، سماعات ملوّنة.']},
+    {pic:'🧥🔀👑',tag:'انتبه!',h:'الشيء نفسه قد يتغيّر',p:['معطف دافئ في الشتاء = حاجة.','معطف ثالث من ماركة مشهورة = رغبة.','الماء حاجة… والعصير الملوّن رغبة.']},
+    {pic:'⚖️',tag:'فكرة مهمة',h:'ثمن الاختيار',p:['معك 20 {c}: إما كتاب أو لعبة.','إذا اخترت الكتاب، فثمن اختيارك هو اللعبة التي لم تشترِها.','كل قرار = تنازل عن شيء آخر.']},
+    {pic:'🛑❓',tag:'قبل أن أشتري',h:'ثلاثة أسئلة سحرية',p:['هل أحتاجه فعلًا أم أرغب فيه فقط؟','هل أستطيع أن أنتظر؟','هل عندي شيء مثله؟']}
+  ],
+  activity:{name:'زاوية الحاجة وزاوية الرغبة',time:'15 دقيقة',
+    materials:['لافتتان كبيرتان: "حاجة" و"رغبة" تُعلّقان في زاويتين من الصف','صور أو بطاقات لأشياء يومية (20 بطاقة)','حقيبة ظهر فارغة (للنشاط الإضافي)'],
+    steps:['ترفع المعلّمة بطاقة، ويمشي الطلاب إلى الزاوية التي يرونها مناسبة.','نسأل طالبًا من كل زاوية: لماذا اخترت هذه الزاوية؟','عندما ينقسم الصف، نناقش: متى يكون هذا الشيء حاجة ومتى يكون رغبة؟','نشاط إضافي – حقيبة الرحلة: تستطيع المجموعة أن تضع 5 أشياء فقط في حقيبة رحلة تخييم. ماذا تختارون؟ ولماذا؟'],
+    discuss:['هل كانت هناك بطاقة صعبة؟ لماذا؟','ما الرغبة التي تستطيع أن تنتظرها؟','لماذا يجب أن نغطّي الحاجات قبل الرغبات؟']},
+  worksheet:[
+    {type:'classify',title:'صنّف: حاجة أم رغبة؟',cols:['حاجة','رغبة'],items:[['ماء للشرب',0],['لعبة فيديو',1],['دواء',0],['حلوى',1],['حذاء للمدرسة',0],['ملصقات',1],['خبز',0],['هاتف جديد',1]]},
+    {type:'draw',title:'ارسم حاجة واحدة ورغبة واحدة من حياتك',boxes:['حاجة','رغبة']},
+    {type:'tf',title:'ضع ✓ أو ✗',items:[['يجب أن نشتري الرغبات قبل الحاجات.',false],['المعطف الدافئ في الشتاء حاجة.',true],['كل الرغبات أشياء سيئة.',false],['عندما أختار شيئًا، أتنازل عن شيء آخر.',true]]},
+    {type:'open',title:'مع رامي 20 {c}. يريد كرة بـ 20 {c} ويحتاج دفترًا بـ 8 {c}. ماذا تنصحه؟ ولماذا؟',lines:3}
+  ],
+  games:[
+    {type:'sort',title:'حاجة أم رغبة؟',instr:'اختر الصندوق المناسب. انتبه للتوضيح بعد كل إجابة!',bins:['حاجة ✅','رغبة 💭'],items:[
+      ['💧','ماء للشرب',0,'لا نعيش بدون ماء.'],['🎮','لعبة إلكترونية جديدة',1,'ممتعة، لكننا نعيش بدونها.'],['💊','دواء عند المرض',0,'الصحة أولًا.'],['🍫','لوح شوكولاتة',1,'لذيذ، لكنه ليس ضروريًا.'],
+      ['🧥','معطف دافئ في الشتاء',0,'يحمينا من البرد.'],['🧢','قبعة ثالثة بلون جديد',1,'عندي قبعتان بالفعل!'],['🏠','بيت نسكن فيه',0,'المسكن من أهم الحاجات.'],['📱','هاتف أحدث',1,'الهاتف القديم ما زال يعمل.'],
+      ['🎒','حقيبة مدرسية (القديمة ممزقة)',0,'نحتاجها للدراسة.'],['🍕','بيتزا كل يوم',1,'الطعام حاجة، لكن البيتزا كل يوم رغبة.'],['📘','كتب المدرسة',0,'التعليم حاجة.'],['🦖','دمية ديناصور كبيرة',1,'ممتعة، لكنها رغبة.']
+    ]}
+  ],
+  riddles:[
+    {q:'بدوني تعطش وتذبل، وأنا أرخص من كل العصائر. فمن أنا؟',a:'الماء 💧 – حاجة',h:'نشربه كل يوم.'},
+    {q:'أنا شيء تتمناه وتحلم به، لكنك تعيش بدوني بخير. فمن أنا؟',a:'الرغبة 💭',h:'عكس الحاجة.'},
+    {q:'أحميك من البرد والمطر، وتنام فيّ كل ليلة. أنا حاجة لا رغبة. فمن أنا؟',a:'البيت (المسكن) 🏠',h:'له باب ونوافذ.'},
+    {q:'عندما تختار الكتاب بدل اللعبة، أصبح أنا اللعبة التي لم تشترِها. فمن أنا؟',a:'ثمن الاختيار ⚖️',h:'كل قرار له…'}
+  ]
+},
+{
+  id:4, title:'ميزانيتي الأولى', sub:'نخطّط قبل أن نصرف',
+  intro:'الميزانية خريطة لمالنا: نعرف كم يدخل، وأين يذهب، وكم يبقى. نجرّب قاعدة الحصّالات الثلاث.',
+  goals:['أن يعرّف الطالب الميزانية ومكوّناتها.','أن يحسب الباقي: الدخل − المصروفات.','أن يميّز بين الفائض والعجز.','أن يبني ميزانية بسيطة لمصروفه.'],
+  terms:[
+    ['الميزانية','خطة تبيّن كم مالًا يدخل وأين سنصرفه.'],
+    ['المصروفات','كل المال الذي نصرفه على ما نشتريه. وتسمّى أيضًا النفقات.'],
+    ['الفائض','المال الذي يبقى بعد المصروفات.'],
+    ['العجز','عندما تكون المصروفات أكبر من الدخل.'],
+    ['التخطيط','أن نفكّر ونقرّر مسبقًا ماذا سنفعل.']
+  ],
+  slides:[
+    {pic:'🗺️💰',tag:'سؤال البداية',h:'إلى أين يذهب المال؟',p:['حصلت على مصروفك… وبعد يومين انتهى!','أين ذهب؟ هل تتذكّر؟']},
+    {pic:'📋',tag:'تعريف',h:'الميزانية',p:['خطة مكتوبة لمالنا.','كم يدخل؟ (الدخل)','أين يذهب؟ (المصروفات)']},
+    {pic:'➖',tag:'المعادلة الذهبية',h:'الدخل − المصروفات = الباقي',p:['دخل لينا 50 {c} في الأسبوع.','صرفت: وجبات 20، دفتر 10، هدية 5 = 35 {c}.','الباقي: 50 − 35 = 15 {c}.']},
+    {pic:'😊😟',tag:'نتيجتان',h:'فائض أم عجز؟',p:['الباقي أكثر من صفر = فائض 😊','المصروفات أكبر من الدخل = عجز 😟','العجز يعني دَينًا أو أشياء لا نستطيع شراءها.']},
+    {pic:'🫙🫙🫙',tag:'قاعدة مفيدة',h:'الحصّالات الثلاث',p:['حصّالة "أدّخر": لأهدافي في المستقبل.','حصّالة "أصرف": لما أحتاجه الآن.','حصّالة "أشارك": للصدقة ومساعدة الآخرين والهدايا.']},
+    {pic:'🥇',tag:'خلاصة',h:'القاعدة الذهبية',p:['لا تصرف أكثر مما تملك.','الحاجات أولًا، ثم الادخار، ثم الرغبات.','اكتب ميزانيتك قبل أن تذهب إلى الدكان.']}
+  ],
+  activity:{name:'ميزانية رحلة الصف',time:'20 دقيقة',
+    materials:['قائمة أسعار مطبوعة: مواصلات، تذاكر، وجبات، مشروبات، هدية تذكارية، ألعاب','مبلغ 200 {c} من نقود اللعب لكل مجموعة','ورقة ميزانية فارغة لكل مجموعة','ثلاثة أكواب أو مرطبانات لكل مجموعة: أدّخر/أصرف/أشارك'],
+    steps:['كل مجموعة مسؤولة عن تنظيم رحلة يوم واحد بميزانية 200 {c}.','تختار المجموعة من قائمة الأسعار وتكتب ميزانيتها: الدخل والمصروفات والباقي.','شرط: يجب أن تشمل الرحلة المواصلات والطعام لكل المجموعة.','تعرض كل مجموعة ميزانيتها: هل حقّقت فائضًا أم عجزًا؟','مكافأة: المجموعة التي توفّر مبلغًا للحصّالة "أشارك" تحصل على نجمة.'],
+    discuss:['ما أصعب قرار اتخذتموه؟','ما الذي حذفتموه لتبقوا ضمن الميزانية؟','كيف يمكن أن نستعمل الفائض؟']},
+  worksheet:[
+    {type:'table',title:'أكمل ميزانية سامر الأسبوعية (الدخل: 60 {c})',head:['البند','المبلغ'],rows:[['وجبات المدرسة','25 {c}'],['قلم ومسطرة','10 {c}'],['ادّخار للدراجة','15 {c}'],['مجموع المصروفات',''],['الباقي','']],ans:'المجموع: 50 {c} · الباقي: 10 {c} (فائض)'},
+    {type:'calc',title:'فائض أم عجز؟ احسب ثم اكتب النتيجة',items:[['الدخل 40 {c}، المصروفات 30 {c}','10 {c} – فائض'],['الدخل 25 {c}، المصروفات 35 {c}','عجز 10 {c}'],['الدخل 80 {c}، المصروفات 80 {c}','0 – لا فائض ولا عجز']]},
+    {type:'table',title:'قسّم 60 {c} على الحصّالات الثلاث كما تحب، ثم اشرح اختيارك',head:['أدّخر','أصرف','أشارك','المجموع'],rows:[['','','','60 {c}']],ans:'إجابات متنوّعة، مثال: 30 · 20 · 10'},
+    {type:'open',title:'لماذا من المهم أن نكتب الميزانية قبل الذهاب إلى الدكان؟',lines:3}
+  ],
+  games:[
+    {type:'budget',title:'مخطّط المصروف الشهري',instr:'معك 100 {c} لهذا الشهر. اختر ما تريد. الهدف: لا عجز، كل الحاجات مغطّاة، وادّخار لهدفك.',income:100,items:[
+      ['🥪','وجبة الفطور في المدرسة',30,'need'],['✏️','دفتر وأقلام للمدرسة',15,'need'],['🚌','تذكرة الحافلة لزيارة جدّتي',10,'need'],['🐷','ادّخار لهدفي (دراجة)',20,'save'],
+      ['🎁','هدية عيد ميلاد صديقي',15,'share'],['🎮','لعبة إلكترونية جديدة',35,'want'],['🍦','بوظة مع الأصدقاء',8,'want'],['⭐','ملصقات كرتونية',7,'want'],['📖','كتاب قصص',12,'want']
+    ]}
+  ],
+  riddles:[
+    {q:'أنا خطة على الورق، أخبرك أين يذهب مالك قبل أن يذهب. فمن أنا؟',a:'الميزانية 📋',h:'تبدأ بحرف الميم.'},
+    {q:'إذا صرفت أقل مما دخل، بقيتُ أنا في جيبك. فمن أنا؟',a:'الفائض 😊',h:'عكس العجز.'},
+    {q:'إذا صرفت أكثر مما تملك، ظهرتُ أنا… فاحذرني! فمن أنا؟',a:'العجز 😟',h:'يعني نقصًا في المال.'},
+    {q:'حزّورة حسابية: معك 40 {c}. اشتريت قلمًا بـ 12 {c} وكتابًا بـ 20 {c}. كم بقي معك؟',a:'8 {c} ✏️',h:'12 + 20 = 32'}
+  ]
+},
+{
+  id:5, title:'ادّخر اليوم لتفرح غدًا', sub:'الادخار والأهداف المالية',
+  intro:'من النملة الذكية نتعلّم الادخار. نضع هدفًا ماليًا، ونحسب كم أسبوعًا نحتاج للوصول إليه، ونتعرّف على البنك.',
+  goals:['أن يعرّف الطالب الادخار ويشرح أهميته.','أن يصوغ هدفًا ماليًا واضحًا: ماذا؟ كم؟ متى؟','أن يحسب عدد الأسابيع اللازمة للوصول إلى الهدف.','أن يتعرّف على دور البنك والفائدة بشكل مبسّط.'],
+  terms:[
+    ['الادخار','الاحتفاظ بجزء من المال لاستخدامه في المستقبل.'],
+    ['الحصّالة','وعاء نجمع فيه النقود التي ندّخرها.'],
+    ['الهدف المالي','شيء محدّد نجمع المال من أجله.'],
+    ['البنك','مؤسسة تحفظ أموال الناس بأمان وتقدّم لهم خدمات مالية.'],
+    ['الحساب البنكي','مكان مالك في البنك، مسجّل باسمك.'],
+    ['الفائدة','مبلغ صغير يضيفه البنك إلى مالك المدّخر مقابل إبقائه عنده.'],
+    ['الصبر','أن نتحمّل الانتظار حتى نصل إلى ما نريد.']
+  ],
+  slides:[
+    {pic:'🐜🦗',tag:'قصة',h:'النملة والجرادة',p:['في الصيف جمعت النملة الطعام، والجرادة غنّت ولعبت.','جاء الشتاء… من كان مستعدًّا؟','ما الدرس الذي نتعلّمه؟']},
+    {pic:'🐷',tag:'تعريف',h:'الادخار',p:['أن نحتفظ بجزء من مالنا للمستقبل.','نصرف اليوم أقل، لنحصل على شيء أكبر غدًا.','ولنكون مستعدين للمفاجآت.']},
+    {pic:'🎯',tag:'خطوة 1',h:'هدفي المالي',p:['ماذا أريد؟ دراجة.','كم ثمنها؟ 120 {c}.','متى أريدها؟ بعد شهرين.']},
+    {pic:'🧮',tag:'خطوة 2',h:'كم أسبوعًا أحتاج؟',p:['ثمن الدراجة 120 {c}.','أدّخر 15 {c} كل أسبوع.','120 ÷ 15 = 8 أسابيع 🎉']},
+    {pic:'🏦',tag:'البنك',h:'مكان آمن للمال',p:['البنك يحفظ المال من الضياع والسرقة.','يضيف البنك مبلغًا صغيرًا اسمه الفائدة.','مثال: 100 {c} قد تصبح 103 {c} بعد سنة.']},
+    {pic:'💡',tag:'نصائح',h:'أسرار المدّخر الناجح',p:['ادّخر أولًا، ثم اصرف ما تبقّى.','ارسم صورة هدفك والصقها على حصّالتك.','قاوِم الإغراءات الصغيرة… فهي تكبر!']}
+  ],
+  activity:{name:'حصّالة الهدف',time:'25 دقيقة',
+    materials:['قوارير بلاستيكية أو علب فارغة نظيفة (يُحضرها الطلاب)','ورق ملوّن، مقصّات، صمغ، أقلام تلوين','بطاقة "هدفي المالي" مطبوعة','لوحة "مقياس الحرارة" لكل طالب لمتابعة الادخار'],
+    steps:['يكتب كل طالب هدفه على البطاقة: ماذا؟ كم؟ متى؟ كم سأدّخر كل أسبوع؟','يحسب الطالب عدد الأسابيع اللازمة (بمساعدة المعلّمة).','يزيّن الطالب حصّالته ويلصق عليها صورة هدفه.','يرسم الطالب "مقياس حرارة" مقسّمًا إلى أسابيع، ويلوّن جزءًا كلما ادّخر.','متابعة أسبوعية: دقيقتان في بداية الحصة لتلوين التقدّم.'],
+    discuss:['ما الشيء الذي قد يمنعك من الوصول إلى هدفك؟','كيف تتصرّف إذا رأيت شيئًا جميلًا في الدكان وأنت تدّخر؟','لماذا يضع الناس أموالهم في البنك؟']},
+  worksheet:[
+    {type:'calc',title:'كم أسبوعًا يحتاج كل طفل للوصول إلى هدفه؟',items:[['تريد مريم كرة بـ 60 {c} وتدّخر 10 {c} كل أسبوع.','6 أسابيع'],['يريد آدم ألوانًا بـ 45 {c} ويدّخر 5 {c} كل أسبوع.','9 أسابيع'],['تريد جود دراجة بـ 150 {c} وتدّخر 25 {c} كل أسبوع.','6 أسابيع']]},
+    {type:'table',title:'بطاقة هدفي المالي',head:['ماذا أريد؟','كم ثمنه؟','كم أدّخر كل أسبوع؟','كم أسبوعًا أحتاج؟'],rows:[['','','','']],ans:'إجابات شخصية'},
+    {type:'fill',title:'املأ الفراغ',bank:['البنك','الفائدة','الادخار','الصبر'],items:[['الاحتفاظ بجزء من المال للمستقبل هو ','الادخار','.'],['مكان آمن نحفظ فيه أموالنا هو ','البنك','.'],['المبلغ الصغير الذي يضيفه البنك اسمه ','الفائدة','.'],['أحتاج إلى ','الصبر',' حتى أصل إلى هدفي.']]},
+    {type:'open',title:'ماذا تعلّمت من قصة النملة والجرادة؟',lines:3}
+  ],
+  games:[
+    {type:'savings',title:'محاكي الحصّالة',instr:'اختر هدفك ومبلغ الادخار الأسبوعي، ثم واجه المفاجآت أسبوعًا بعد أسبوع. هل تصل إلى هدفك بسرعة؟',
+      goals:[['🎨','مجموعة ألوان فنية',45],['⚽','كرة قدم',60],['🚲','دراجة',150]],weekly:[5,10,15,20],
+      events:[
+        {t:'صديقك يدعوك لشراء بوظة.',cost:6,pic:'🍦'},
+        {t:'جدّك أعطاك هدية صغيرة!',gift:10,pic:'👴'},
+        {t:'رأيت سيارة لعبة صغيرة في الدكان.',cost:8,pic:'🚗'},
+        {t:'أسبوع هادئ بلا مفاجآت.',pic:'😌'},
+        {t:'ساعدت في ترتيب المخزن فأعطاك أهلك مكافأة.',gift:5,pic:'📦'},
+        {t:'إعلان عن حلوى جديدة بلون غريب!',cost:4,pic:'🍬'},
+        {t:'معرض ملصقات في المدرسة.',cost:7,pic:'⭐'},
+        {t:'وجدت قطعة نقود نسيتها في جيب معطفك القديم.',gift:3,pic:'🧥'}
+      ]}
+  ],
+  riddles:[
+    {q:'بطني فارغ في البداية، وكلما أطعمتني نقودًا ثقلت وفرحت. فمن أنا؟',a:'الحصّالة 🐷',h:'كثيرًا ما تكون على شكل خنزير صغير.'},
+    {q:'مبنى كبير يحفظ أموال الناس، ويعطيهم مكافأة صغيرة على ادخارهم. فمن أنا؟',a:'البنك 🏦',h:'فيه صرّاف آلي.'},
+    {q:'صفة إذا كانت عندك وصلت إلى هدفك، ولو بعد حين. فمن أنا؟',a:'الصبر ⏳',h:'"… مفتاح الفرج".'},
+    {q:'حزّورة حسابية: تريد كرة بـ 60 {c} وتدّخر 10 {c} كل أسبوع. كم أسبوعًا تحتاج؟',a:'6 أسابيع ⚽',h:'60 ÷ 10'}
+  ]
+},
+{
+  id:6, title:'المستهلك الذكي', sub:'نقارن ونفحص ولا ننخدع',
+  intro:'نصبح متسوّقين أذكياء: نقارن الأسعار، نكشف حيل الإعلانات، ونتأكّد من الفاتورة والباقي.',
+  goals:['أن يعرّف الطالب المستهلك والإعلان والتخفيض.','أن يقارن بين سعرين ويختار الأوفر.','أن يحسب الباقي بعد الدفع.','أن يكشف حيلتين يستخدمهما المعلنون.'],
+  terms:[
+    ['المستهلك','كل شخص يشتري السلع والخدمات ويستخدمها.'],
+    ['السعر','المبلغ الذي ندفعه مقابل سلعة أو خدمة.'],
+    ['مقارنة الأسعار','أن نبحث عن سعر السلعة نفسها في أماكن مختلفة قبل الشراء.'],
+    ['التخفيض','مبلغ يُنقَص من السعر الأصلي، ويسمّى أيضًا الخصم.'],
+    ['الإعلان','رسالة تحاول أن تقنعنا بشراء منتج.'],
+    ['الفاتورة','ورقة تبيّن ما اشتريناه وكم دفعنا.'],
+    ['الباقي','المال الذي يعيده البائع إذا دفعنا أكثر من السعر.']
+  ],
+  slides:[
+    {pic:'🛒',tag:'سؤال البداية',h:'هل أنت متسوّق ذكي؟',p:['هل اشتريت شيئًا وندمت بعد يوم؟','ماذا حدث؟ لماذا اشتريته؟']},
+    {pic:'🔍',tag:'المهارة 1',h:'قارن الأسعار',p:['العصير نفسه: في الدكان الأول 6 {c}، وفي الثاني 4 {c}.','أين نشتري؟ ولماذا؟','دقيقة مقارنة توفّر المال.']},
+    {pic:'📦📦',tag:'المهارة 2',h:'الكبيرة أم الصغيرة؟',p:['علبة فيها 2 بسكويت بـ 4 {c}: سعر الواحدة 2 {c}.','علبة فيها 6 بسكويت بـ 9 {c}: سعر الواحدة 1.5 {c}.','نقسم السعر على العدد لنعرف الأوفر.']},
+    {pic:'📺✨',tag:'المهارة 3',h:'اكشف حيل الإعلان',p:['شخص مشهور يحمل المنتج.','"اليوم فقط!" لكي نستعجل.','ألوان وموسيقى ولعبة صغيرة داخل العلبة.','الإعلان لا يقول لك العيوب!']},
+    {pic:'🏷️',tag:'المهارة 4',h:'التخفيض',p:['السعر الأصلي 50 {c}، والتخفيض 10 {c}.','السعر الجديد: 50 − 10 = 40 {c}.','لكن: التخفيض على شيء لا أحتاجه ليس توفيرًا!']},
+    {pic:'🧾',tag:'المهارة 5',h:'افحص الفاتورة والباقي',p:['اشتريت بـ 35 {c} ودفعت 50 {c}.','الباقي: 50 − 35 = 15 {c}.','عُدّ الباقي قبل أن تبتعد عن الصندوق.']}
+  ],
+  activity:{name:'السوبرماركت الصغير',time:'25 دقيقة',
+    materials:['علب ومنتجات فارغة نظيفة يُحضرها الطلاب، مع بطاقات أسعار','منشوران إعلانيان مختلفان للمنتج نفسه بسعرين مختلفين','نقود ورقية للعب: 50 {c} لكل طالب','دفتر فواتير صغير للبائعين'],
+    steps:['نحوّل طاولات الصف إلى دكّانين، لكل دكان قائمة أسعار مختلفة قليلًا.','يحصل كل طالب على قائمة مشتريات و 50 {c}.','المهمة: شراء كل ما في القائمة بأقل سعر ممكن، والحصول على فاتورة.','يتأكّد الطالب من الباقي ويكتبه.','في الختام: كل مجموعة تصمّم إعلانًا "صادقًا" لمنتج، يذكر حسناته وعيوبه.'],
+    discuss:['من وفّر أكثر؟ كيف فعلت ذلك؟','هل خدعك منشور أو إعلان؟','ما الفرق بين الإعلان العادي والإعلان الصادق الذي صمّمتموه؟']},
+  worksheet:[
+    {type:'table',title:'قارن الأسعار وضع دائرة حول الأوفر',head:['السلعة','الدكان أ','الدكان ب','أين أشتري؟'],rows:[['دفتر','7 {c}','5 {c}',''],['عصير','4 {c}','6 {c}',''],['قلم','3 {c}','3 {c}','']],ans:'الدفتر: ب · العصير: أ · القلم: لا فرق'},
+    {type:'calc',title:'احسب الباقي',items:[['اشتريت بـ 35 {c} ودفعت 50 {c}.','15 {c}'],['اشتريت بـ 18 {c} ودفعت 20 {c}.','2 {c}'],['ثمن الكرة 40 {c} وعليها تخفيض 10 {c}. كم أدفع؟','30 {c}']]},
+    {type:'tf',title:'ضع ✓ أو ✗',items:[['كل ما يُعرض في الإعلان مفيد لنا.',false],['المقارنة بين الأسعار توفّر المال.',true],['يجب أن أعدّ الباقي قبل أن أترك الصندوق.',true],['التخفيض يعني أن أشتري حتى لو لم أكن أحتاج.',false]]},
+    {type:'draw',title:'صمّم إعلانًا صادقًا لمنتج تحبه: اذكر حسنة واحدة وعيبًا واحدًا',boxes:['إعلاني الصادق']}
+  ],
+  games:[
+    {type:'quiz',title:'أيّ العرضين أوفر؟',instr:'اختر الصفقة الأفضل. فكّر في سعر القطعة الواحدة.',qs:[
+      {q:'نفس العصير:',o:['الدكان الأول: 6 {c}','الدكان الثاني: 4 {c}'],a:1,ex:'4 أقل من 6.'},
+      {q:'بسكويت:',o:['2 قطع بـ 4 {c}','6 قطع بـ 9 {c}'],a:1,ex:'القطعة في العرض الأول بـ 2، وفي الثاني بـ 1.5.'},
+      {q:'أقلام:',o:['3 أقلام بـ 9 {c}','قلم واحد بـ 2 {c}'],a:1,ex:'القلم في العرض الأول بـ 3 {c}، والثاني بـ 2 {c}.'},
+      {q:'كرة سعرها 50 {c}:',o:['تخفيض 15 {c}','السعر الجديد 40 {c}'],a:0,ex:'50 − 15 = 35، وهذا أقل من 40.'},
+      {q:'اشتريت بـ 35 {c} ودفعت 50 {c}. أعطاك البائع 10 {c} باقيًا. ماذا تفعل؟',o:['أشكره وأذهب','أخبره بلطف أن الباقي 15 {c}','لا شيء، الفرق صغير'],a:1,ex:'50 − 35 = 15، فمن حقك 5 {c} أخرى.'}
+    ]},
+    {type:'sort',title:'حيلة إعلانية أم معلومة مفيدة؟',instr:'اقرأ الجملة من الإعلان واختر.',bins:['حيلة إعلانية 🎭','معلومة مفيدة ℹ️'],items:[
+      ['⏰','"اشترِ الآن! العرض ينتهي بعد ساعة!"',0,'الاستعجال يمنعنا من التفكير.'],['🏷️','"السعر: 12 {c} للعلبة"',1,'السعر معلومة نحتاجها للمقارنة.'],['🌟','"لاعب كرة مشهور يشرب هذا العصير!"',0,'شهرة اللاعب لا تجعل العصير أفضل.'],['📏','"الحجم: 500 غرام"',1,'الحجم يساعدنا على حساب سعر الوحدة.'],['🎁','"لعبة مجانية داخل كل علبة!"',0,'اللعبة تُغرينا بشراء ما لا نحتاجه.'],['📅','"صالح حتى تاريخ 10/12"',1,'تاريخ الصلاحية معلومة مهمّة.']
+    ]}
+  ],
+  riddles:[
+    {q:'ورقة صغيرة تخرج من آلة الدكان، فيها ما اشتريت وكم دفعت. فمن أنا؟',a:'الفاتورة 🧾',h:'احتفظ بها!'},
+    {q:'أظهر في التلفاز والهاتف والشارع، وأجعلك تريد ما لم تكن تريده. فمن أنا؟',a:'الإعلان 📺',h:'مليء بالألوان والموسيقى.'},
+    {q:'إذا رأيتني على بطاقة السعر فرحت، لأنني أُنقِص منه. فمن أنا؟',a:'التخفيض 🏷️',h:'ويسمّى أيضًا الخصم.'},
+    {q:'حزّورة حسابية: اشتريت بـ 35 {c} ودفعت 50 {c}. كم الباقي؟',a:'15 {c} 🧾',h:'50 ناقص 35.'}
+  ]
+}
+];
+
+const FINAL = {
+  title:'مشروع الختام: سوق الصف الصغير',
+  intro:'يطبّق الطلاب كل ما تعلّموه: يصنعون منتجًا بسيطًا، يحسبون تكلفته، يحدّدون سعره، يبيعونه في سوق الصف، ثم يقسّمون الربح على الحصّالات الثلاث.',
+  steps:[
+    ['أسبوع 1 – الفكرة','تختار كل مجموعة منتجًا بسيطًا (أساور، بطاقات معايدة، فواصل كتب، عصير، نبتة صغيرة) وتكتب: ما حاجة الناس أو رغبتهم التي يلبّيها؟'],
+    ['أسبوع 1 – الميزانية','تكتب المجموعة قائمة المواد وتكلفتها (بنقود اللعب أو مواد معاد تدويرها)، وتحسب التكلفة الكلية.'],
+    ['أسبوع 2 – السعر والإعلان','تحدّد المجموعة سعر البيع وتحسب الربح المتوقع، وتصمّم إعلانًا صادقًا ولافتة للكشك.'],
+    ['أسبوع 2 – يوم السوق','يفتح السوق لطلاب صف آخر أو للأهل. يكتب البائعون فواتير ويحسبون الباقي.'],
+    ['أسبوع 3 – الحساب والتأمّل','تحسب كل مجموعة الربح الفعلي: الدخل − التكلفة، وتقسّمه على: أدّخر / أصرف / أشارك (مثلًا: تبرّع لمشروع خيري في المدرسة).']
+  ],
+  rubric:[
+    ['فهم المصطلحات','يستخدم 3 مصطلحات أو أقل بشكل صحيح','يستخدم 4–6 مصطلحات بشكل صحيح','يستخدم 7 مصطلحات أو أكثر ويشرحها لغيره'],
+    ['الميزانية','ميزانية ناقصة','ميزانية كاملة مع خطأ حسابي بسيط','ميزانية كاملة ودقيقة مع فائض'],
+    ['حساب الربح والباقي','يحتاج مساعدة في الحساب','يحسب بشكل صحيح غالبًا','يحسب بدقة ويتحقّق من الفواتير'],
+    ['العمل الجماعي','يشارك قليلًا','يشارك ويؤدّي دوره','يقود ويساعد زملاءه'],
+    ['الإعلان الصادق','لا يذكر معلومات مفيدة','يذكر السعر والحسنات','يذكر السعر والحسنات والعيوب بوضوح']
+  ]
+};
+
+const FINAL_QUIZ = [
+  {q:'تبادل سلعة بسلعة دون مال يسمّى…',o:['الادخار','المقايضة','الإعلان'],a:1},
+  {q:'أيّها خدمة؟',o:['تفاحة','قصّ الشعر','كتاب'],a:1},
+  {q:'سعر البيع 30 {c} والتكلفة 12 {c}. الربح هو…',o:['18 {c}','42 {c}','12 {c}'],a:0},
+  {q:'أيّها حاجة؟',o:['لعبة فيديو','دواء عند المرض','حلوى'],a:1},
+  {q:'معك 20 {c}. اخترت الكتاب بدل الكرة. ثمن اختيارك هو…',o:['الكتاب','الكرة','لا شيء'],a:1},
+  {q:'الدخل 50 {c} والمصروفات 60 {c}. النتيجة…',o:['فائض 10 {c}','عجز 10 {c}','لا شيء'],a:1},
+  {q:'الحصّالات الثلاث هي…',o:['أدّخر، أصرف، أشارك','آكل، ألعب، أنام','أبيع، أشتري، أقايض'],a:0},
+  {q:'تريد دراجة بـ 100 {c} وتدّخر 20 {c} كل أسبوع. كم أسبوعًا تحتاج؟',o:['4','5','20'],a:1},
+  {q:'المبلغ الصغير الذي يضيفه البنك إلى مدّخراتك اسمه…',o:['الفائدة','الفاتورة','الراتب'],a:0},
+  {q:'إعلان يقول "اليوم فقط!" يحاول أن…',o:['يعطيك معلومة مهمة','يجعلك تستعجل','يخفض السعر دائمًا'],a:1},
+  {q:'اشتريت بـ 27 {c} ودفعت 30 {c}. الباقي…',o:['3 {c}','7 {c}','57 {c}'],a:0},
+  {q:'أفضل ترتيب لصرف المال:',o:['الرغبات ثم الحاجات','الحاجات ثم الادخار ثم الرغبات','الرغبات فقط'],a:1}
+];
+
+/* ======================= الحالة والأدوات ======================= */
+const $ = s => document.querySelector(s);
+const store = {
+  get(k,d){try{const v=localStorage.getItem('hasala-'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('hasala-'+k,JSON.stringify(v))}catch(e){}}
+};
+let CUR = store.get('cur','شيكل');
+let COINS = store.get('coins',0);
+const C = s => String(s).split('{c}').join(CUR);
+const shuffle = (arr,seed) => {
+  const a = arr.slice(); let s = seed ?? Math.floor(Math.random()*1e9);
+  const rnd = () => { s = (s + 0x6D2B79F5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  for (let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+  return a;
+};
+let toastT;
+function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2200)}
+function addCoins(n,msg){COINS+=n;store.set('coins',COINS);$('#coins').textContent=COINS;toast((msg?msg+' ':'')+'+'+n+' 🪙')}
+const inFrame = (()=>{try{return window.self!==window.top}catch(e){return true}})();
+
+/* ======================= التوجيه ======================= */
+let state = {view:'home',lesson:1,tab:'terms'};
+const TABS = [['terms','الأهداف والمصطلحات'],['slides','العارضة'],['activity','الفعالية'],['sheet','ورقة العمل'],['games','الألعاب'],['riddles','الحزازير']];
+function parseHash(){
+  const h = location.hash.replace('#','');
+  const m = h.match(/^lesson([1-6])(?:-(\w+))?$/);
+  if (m){state={view:'lesson',lesson:+m[1],tab:TABS.some(t=>t[0]===m[2])?m[2]:'terms'};return}
+  if (['glossary','arcade','guide','final'].includes(h)){state={view:h};return}
+  state={view:'home'};
+}
+function go(view,lesson,tab){
+  const h = view==='lesson' ? 'lesson'+lesson+'-'+(tab||'terms') : (view==='home'?'':view);
+  try{history.replaceState(null,'',h?'#'+h:location.pathname+location.search)}catch(e){}
+  if(view==='lesson')state={view,lesson,tab:tab||'terms'};else state={view};
+  render(); window.scrollTo({top:0});
+}
+
+function renderRail(){
+  const items = [['home','الرئيسية']].concat(LESSONS.map(l=>['lesson'+l.id,'الدرس '+l.id])).concat([['final','مشروع الختام'],['glossary','القاموس'],['arcade','ساحة الألعاب'],['guide','دليل المعلّم']]);
+  const cur = state.view==='lesson' ? 'lesson'+state.lesson : state.view;
+  $('#rail').innerHTML = items.map(([k,t])=>`<button data-k="${k}" aria-current="${k===cur}">${t}</button>`).join('');
+  $('#rail').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    const k=b.dataset.k; if(k.startsWith('lesson'))go('lesson',+k.slice(6));else go(k);
+  });
+}
+
+function render(){
+  renderRail();
+  const v=$('#view');
+  if(state.view==='lesson')return renderLesson(v);
+  if(state.view==='glossary')return renderGlossary(v);
+  if(state.view==='arcade')return renderArcade(v);
+  if(state.view==='guide')return renderGuide(v);
+  if(state.view==='final')return renderFinal(v);
+  renderHome(v);
+}
+
+/* ======================= الرئيسية ======================= */
+function renderHome(v){
+  const nTerms = LESSONS.reduce((s,l)=>s+l.terms.length,0);
+  const nRid = LESSONS.reduce((s,l)=>s+l.riddles.length,0);
+  const nGames = LESSONS.reduce((s,l)=>s+l.games.length,0)+2;
+  v.innerHTML = `
+  <section class="hero">
+    <div>
+      <h2>نتعلّم كيف نكسب المال، ونخطّط له، وندّخره، ونصرفه بذكاء</h2>
+      <p>ستة دروس للصف الرابع ومشروع ختامي. في كل درس: أهداف ومصطلحات على بطاقات قلّابة، عارضة للعرض على اللوح، فعالية صفّية، ورقة عمل جاهزة مع مفتاح إجابات، ألعاب تفاعلية، وحزازير. اجمع القطع الذهبية في الألعاب!</p>
+      <div class="stats">
+        <span class="chip">6 دروس + مشروع</span><span class="chip gold">${nTerms} مصطلحًا</span><span class="chip blue">${nGames} لعبة تفاعلية</span><span class="chip red">${nRid} حزّورة</span>
+      </div>
+    </div>
+    ${jarSVG()}
+  </section>
+  <section class="lessons">
+    ${LESSONS.map(l=>`
+      <button class="lcard" data-l="${l.id}">
+        <span class="lnum">${l.id}</span>
+        <h3>${l.title}</h3>
+        <p>${C(l.intro)}</p>
+        <span class="tags">${l.terms.slice(0,3).map(t=>`<span class="chip">${t[0]}</span>`).join('')}</span>
+      </button>`).join('')}
+    <button class="lcard" data-final="1">
+      <span class="lnum" style="background:var(--mint);border-color:var(--ink);color:var(--on-accent)">★</span>
+      <h3>${FINAL.title}</h3>
+      <p>${FINAL.intro}</p>
+      <span class="tags"><span class="chip gold">مشروع جماعي</span><span class="chip">تقييم</span></span>
+    </button>
+  </section>`;
+  v.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>go('lesson',+b.dataset.l));
+  v.querySelector('[data-final]').onclick=()=>go('final');
+}
+function jarSVG(){
+  return `<svg class="jar" viewBox="0 0 220 220" role="img" aria-label="حصّالة مليئة بالقطع النقدية">
+    <ellipse cx="110" cy="205" rx="80" ry="8" fill="var(--line)"/>
+    <rect x="45" y="58" width="130" height="145" rx="30" fill="var(--card)" stroke="var(--ink)" stroke-width="5"/>
+    <rect x="60" y="40" width="100" height="22" rx="8" fill="var(--mint)" stroke="var(--ink)" stroke-width="5"/>
+    <rect x="92" y="46" width="36" height="6" rx="3" fill="var(--ink)"/>
+    <clipPath id="jc"><rect x="48" y="61" width="124" height="139" rx="27"/></clipPath>
+    <g clip-path="url(#jc)">
+      ${[0,1,2,3,4,5,6].map(r=>[0,1,2,3,4].map(c=>`<ellipse cx="${62+c*24+(r%2)*12}" cy="${192-r*13}" rx="13" ry="6" fill="var(--coin-bright)" stroke="var(--coin)" stroke-width="2"/>`).join('')).join('')}
+    </g>
+    <g><circle cx="110" cy="18" r="13" fill="var(--coin-bright)" stroke="var(--coin)" stroke-width="3"><animate attributeName="cy" values="6;30;6" dur="2.4s" repeatCount="indefinite"/></circle></g>
+    <text x="110" y="128" text-anchor="middle" font-family="Lalezar, sans-serif" font-size="26" fill="var(--ink)">أدّخر</text>
+  </svg>`;
+}
+
+/* ======================= الدرس ======================= */
+function renderLesson(v){
+  const L = LESSONS.find(l=>l.id===state.lesson);
+  v.innerHTML = `
+    <div class="lhead"><span class="lnum">${L.id}</span><div><h2>${L.title}</h2><p>${L.sub} · ${C(L.intro)}</p></div></div>
+    <div class="subtabs" role="tablist">${TABS.map(([k,t])=>`<button role="tab" data-t="${k}" aria-selected="${state.tab===k}">${t}</button>`).join('')}</div>
+    <div class="panel" id="panel"></div>`;
+  v.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>go('lesson',L.id,b.dataset.t));
+  const p = $('#panel');
+  ({terms:pTerms,slides:pSlides,activity:pActivity,sheet:pSheet,games:pGames,riddles:pRiddles})[state.tab](p,L);
+}
+
+function pTerms(p,L){
+  p.innerHTML = `
+    <div class="box"><h3>أهداف الدرس</h3><ul class="goals">${L.goals.map(g=>`<li>${g}</li>`).join('')}</ul></div>
+    <div><h3 style="margin-bottom:10px">بطاقات المصطلحات <span class="chip">اضغط على البطاقة لقلبها</span></h3>
+    <div class="terms">${L.terms.map(([t,d])=>`<button class="flip"><span class="in"><span class="f"><span><strong>${t}</strong><span>ما معناي؟</span></span></span><span class="b">${C(d)}</span></span></button>`).join('')}</div></div>`;
+  p.querySelectorAll('.flip').forEach(f=>f.onclick=()=>f.classList.toggle('on'));
+}
+
+function pSlides(p,L){
+  let i=0;
+  p.innerHTML = `<div class="deck" id="deck"><div id="sl"></div>
+    <div class="deckbar"><button class="btn ghost" id="prev">→ السابقة</button><div class="dots" id="dots"></div><span id="cnt" style="font-variant-numeric:tabular-nums"></span><button class="btn" id="next">التالية ←</button><button class="btn gold" id="fs">عرض بملء الشاشة</button></div></div>
+    <p class="note">نصيحة للمعلّم: استخدم مفاتيح الأسهم للتنقّل بين الشرائح. توقّف عند كل سؤال واترك الطلاب يناقشون قبل الانتقال.</p>`;
+  const draw=()=>{
+    const s=L.slides[i];
+    $('#sl').innerHTML=`<div class="slide"><div class="pic" aria-hidden="true">${s.pic}</div><div><span class="tag">${s.tag}</span><h3>${C(s.h)}</h3><ul>${s.p.map(x=>`<li>${C(x)}</li>`).join('')}</ul></div></div>`;
+    $('#dots').innerHTML=L.slides.map((_,k)=>`<i class="${k===i?'on':''}"></i>`).join('');
+    $('#cnt').textContent=(i+1)+' / '+L.slides.length;
+    $('#prev').disabled=i===0;$('#next').disabled=i===L.slides.length-1;
+  };
+  $('#prev').onclick=()=>{if(i>0){i--;draw()}};
+  $('#next').onclick=()=>{if(i<L.slides.length-1){i++;draw()}};
+  $('#fs').onclick=()=>{const d=$('#deck');try{(document.fullscreenElement?document.exitFullscreen():d.requestFullscreen()).catch(()=>toast('ملء الشاشة غير متاح هنا'))}catch(e){toast('ملء الشاشة غير متاح هنا')}};
+  document.onkeydown=e=>{if(state.view!=='lesson'||state.tab!=='slides')return;if(e.key==='ArrowLeft')$('#next').click();if(e.key==='ArrowRight')$('#prev').click()};
+  draw();
+}
+
+function pActivity(p,L){
+  const a=L.activity;
+  p.innerHTML=`
+    <div class="box"><h3>فعالية: ${a.name}</h3><div class="meta"><span class="chip gold">المدة: ${a.time}</span><span class="chip">عمل جماعي</span></div>
+      <div class="cols">
+        <div><h3 style="font-size:1.1rem">المواد المطلوبة</h3><ul class="goals">${a.materials.map(m=>`<li>${C(m)}</li>`).join('')}</ul></div>
+        <div><h3 style="font-size:1.1rem">خطوات التنفيذ</h3><ol class="steps">${a.steps.map(s=>`<li>${C(s)}</li>`).join('')}</ol></div>
+      </div></div>
+    <div class="box"><h3>أسئلة للنقاش بعد الفعالية</h3><ul class="goals">${a.discuss.map(d=>`<li>${C(d)}</li>`).join('')}</ul></div>`;
+}
+
+/* ورقة العمل */
+function wsSection(s,n,seed){
+  const head=`<h4><b>${n}</b>${C(s.title)}</h4>`;
+  if(s.type==='match'){
+    const right=s.pairs.map(p=>p[0]); const left=shuffle(s.pairs.map((p,k)=>[p[1],k+1]),seed);
+    return head+`<p style="font-size:.88rem">اكتب رقم المصطلح في المربّع المناسب.</p><div class="grid2"><div>${right.map((t,k)=>`<div class="row"><b>${k+1}.</b> ${t}</div>`).join('')}</div><div>${left.map(([d,k])=>`<div class="row"><span class="sq"><span class="ans">${k}</span></span> ${C(d)}</div>`).join('')}</div></div>`;
+  }
+  if(s.type==='order'){
+    const it=shuffle(s.items.map((t,k)=>[t,k+1]),seed);
+    return head+it.map(([t,k])=>`<div class="row"><span class="sq"><span class="ans">${k}</span></span> ${C(t)}</div>`).join('');
+  }
+  if(s.type==='tf') return head+s.items.map(([t,ok])=>`<div class="row"><span class="sq"><span class="ans">${ok?'✓':'✗'}</span></span> ${C(t)}</div>`).join('');
+  if(s.type==='calc') return head+s.items.map(([q,a],k)=>`<div class="row"><b>${['أ','ب','ج','د','هـ'][k]})</b> ${C(q)}</div><div class="row">الحلّ: <span class="blank" style="flex:1"><span class="ans">${C(a)}</span></span></div>`).join('');
+  if(s.type==='classify'){
+    const it=shuffle(s.items,seed);
+    return head+`<div class="bank">${it.map(x=>`<span>${x[0]}</span>`).join('')}</div><div class="grid2">${s.cols.map((c,k)=>`<div class="bin"><b>${c}</b><span class="ans">${s.items.filter(x=>x[1]===k).map(x=>x[0]).join('، ')}</span></div>`).join('')}</div>`;
+  }
+  if(s.type==='fill') return head+`<div class="bank">${shuffle(s.bank,seed).map(b=>`<span>${b}</span>`).join('')}</div>`+s.items.map(([a,ans,b])=>`<div class="row">${a}<span class="blank"><span class="ans">${ans}</span></span>${b}</div>`).join('');
+  if(s.type==='open') return head+Array.from({length:s.lines||3},()=>'<div class="line"></div>').join('');
+  if(s.type==='draw') return head+`<div class="grid2">${s.boxes.map(b=>`<div class="drawbox">${b}</div>`).join('')}</div>`;
+  if(s.type==='table') return head+`<div class="tablewrap"><table><thead><tr>${s.head.map(h=>`<th>${C(h)}</th>`).join('')}</tr></thead><tbody>${s.rows.map(r=>`<tr>${r.map(c=>`<td>${c?C(c):'&nbsp;'}</td>`).join('')}</tr>`).join('')}</tbody></table></div>${s.ans?`<p class="ans" style="font-size:.88rem;margin-top:6px">${C(s.ans)}</p>`:''}`;
+  return '';
+}
+function pSheet(p,L){
+  p.innerHTML=`
+    <div class="sheettools">
+      <button class="btn ghost" id="keyBtn">إظهار مفتاح الإجابات</button>
+      ${inFrame?'':'<button class="btn" id="printBtn">طباعة ورقة العمل</button>'}
+    </div>
+    ${inFrame?'<p class="note noprint">للطباعة: افتح ملف index.html من مجلد الدروس في المتصفّح واضغط زر الطباعة، أو استخدم أمر الطباعة في المتصفّح.</p>':''}
+    <article class="sheet" id="sheet">
+      <h3>ورقة عمل – الدرس ${L.id}: ${L.title}</h3>
+      <div class="who"><span>الاسم:</span><span>الصف:</span><span>التاريخ:</span></div>
+      ${L.worksheet.map((s,k)=>`<section>${wsSection(s,k+1,L.id*31+k)}</section>`).join('')}
+      <p style="text-align:center;margin-top:22px;font-size:.85rem;color:#5A7069">قيّم نفسك: ☆ ☆ ☆ ☆ ☆ &nbsp; · &nbsp; حصّالة المعرفة</p>
+    </article>`;
+  $('#keyBtn').onclick=e=>{const s=$('#sheet');s.classList.toggle('key');e.target.textContent=s.classList.contains('key')?'إخفاء مفتاح الإجابات':'إظهار مفتاح الإجابات'};
+  if(!inFrame)$('#printBtn').onclick=()=>window.print();
+}
+
+function pGames(p,L){
+  p.innerHTML=L.games.map((g,k)=>`<div class="box game" id="g${k}"></div>`).join('');
+  L.games.forEach((g,k)=>mountGame($('#g'+k),g));
+}
+function pRiddles(p,L){
+  p.innerHTML=`<p class="note">طريقة اللعب: يقرأ المعلّم الحزّورة بصوت عالٍ، ويرفع الطلاب أيديهم. يمكن طلب تلميح قبل كشف الجواب. اقتراح: نقطة للمجموعة التي تجيب بلا تلميح.</p>
+  <div class="riddles">${L.riddles.map((r,k)=>`<div class="riddle"><p class="q">${C(r.q)}</p><p class="h" hidden>تلميح: ${C(r.h)}</p><p class="a" hidden>${C(r.a)}</p><div class="acts"><button class="btn ghost" data-h>تلميح</button><button class="btn gold" data-a>اكشف الجواب</button></div></div>`).join('')}</div>`;
+  p.querySelectorAll('.riddle').forEach(r=>{
+    r.querySelector('[data-h]').onclick=()=>r.querySelector('.h').hidden=false;
+    r.querySelector('[data-a]').onclick=()=>r.querySelector('.a').hidden=false;
+  });
+}
+
+/* ======================= محرّكات الألعاب ======================= */
+function mountGame(el,g){({order:gOrder,sort:gSort,quiz:gQuiz,budget:gBudget,savings:gSavings,memory:gMemory})[g.type](el,g)}
+
+function gOrder(el,g){
+  let next=0; const items=shuffle(g.items.map((t,k)=>[t,k]));
+  el.innerHTML=`<h3>${g.title}</h3><p class="instr">${g.instr}</p><div class="track" id="tr"></div><div class="pool" id="pl"></div><div><button class="btn ghost" data-r>العب من جديد</button></div>`;
+  const pl=el.querySelector('#pl'),tr=el.querySelector('#tr');
+  pl.innerHTML=items.map(([t,k])=>`<button class="tile" data-k="${k}">${C(t)}</button>`).join('');
+  pl.querySelectorAll('.tile').forEach(b=>b.onclick=()=>{
+    if(+b.dataset.k===next){b.classList.add('done');tr.appendChild(b);b.onclick=null;next++;
+      if(next===g.items.length){addCoins(5,'أحسنت! رتّبتها كلها.');tr.insertAdjacentHTML('afterend','<div class="fb ok">ممتاز! هذه هي رحلة المال من الماضي إلى اليوم.</div>')}}
+    else{b.classList.remove('bad');void b.offsetWidth;b.classList.add('bad')}
+  });
+  el.querySelector('[data-r]').onclick=()=>gOrder(el,g);
+}
+
+function gSort(el,g){
+  const items=shuffle(g.items); let i=0,score=0;
+  const draw=()=>{
+    if(i>=items.length){
+      el.innerHTML=`<h3>${g.title}</h3><div class="bigcard"><div class="pic">🏆</div><p class="q">النتيجة: ${score} من ${items.length}</p><p>${score===items.length?'علامة كاملة! أنت خبير.':'جيد! جرّب مرة أخرى لتحصل على العلامة الكاملة.'}</p><button class="btn" data-r>العب من جديد</button></div>`;
+      el.querySelector('[data-r]').onclick=()=>gSort(el,g);return;
+    }
+    const [pic,t,b,why]=items[i];
+    el.innerHTML=`<h3>${g.title}</h3><p class="instr">${g.instr}</p><div class="score"><span class="chip">بطاقة ${i+1} من ${items.length}</span><span class="chip gold">صحيح: ${score}</span></div>
+      <div class="bigcard"><div class="pic">${pic}</div><p class="q">${C(t)}</p>
+      <div class="choices">${g.bins.map((n,k)=>`<button class="btn ${k?'red':''}" data-b="${k}">${n}</button>`).join('')}</div><div id="fb"></div></div>`;
+    el.querySelectorAll('[data-b]').forEach(btn=>btn.onclick=()=>{
+      const ok=+btn.dataset.b===b; if(ok){score++;addCoins(1)}
+      el.querySelectorAll('[data-b]').forEach(x=>x.disabled=true);
+      el.querySelector('#fb').outerHTML=`<div class="fb ${ok?'ok':'no'}">${ok?'صحيح! ':'ليس تمامًا. الجواب: '+g.bins[b]+'. '}${why?C(why):''}</div><button class="btn gold" data-n>التالي ←</button>`;
+      el.querySelector('[data-n]').onclick=()=>{i++;draw()};
+    });
+  };
+  draw();
+}
+
+function gQuiz(el,g){
+  let i=0,score=0;
+  const draw=()=>{
+    if(i>=g.qs.length){
+      el.innerHTML=`<h3>${g.title}</h3><div class="bigcard"><div class="pic">${score===g.qs.length?'🏆':'⭐'}</div><p class="q">النتيجة: ${score} من ${g.qs.length}</p><button class="btn" data-r>العب من جديد</button></div>`;
+      el.querySelector('[data-r]').onclick=()=>gQuiz(el,g);return;
+    }
+    const q=g.qs[i];
+    el.innerHTML=`<h3>${g.title}</h3><p class="instr">${C(g.instr||'')}</p><div class="score"><span class="chip">سؤال ${i+1} من ${g.qs.length}</span><span class="chip gold">صحيح: ${score}</span></div>
+      <div class="bigcard"><p class="q">${C(q.q)}</p><div class="opts">${q.o.map((o,k)=>`<button class="opt" data-o="${k}">${C(o)}</button>`).join('')}</div><div id="fb"></div></div>`;
+    el.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{
+      const k=+b.dataset.o, ok=k===q.a; if(ok){score++;addCoins(1)}
+      el.querySelectorAll('[data-o]').forEach(x=>{x.disabled=true;if(+x.dataset.o===q.a)x.classList.add('right')});
+      if(!ok)b.classList.add('wrong');
+      el.querySelector('#fb').outerHTML=`<div class="fb ${ok?'ok':'no'}">${ok?'إجابة صحيحة! ':'انتبه: '}${q.ex?C(q.ex):''}</div><button class="btn gold" data-n>${i===g.qs.length-1?'النتيجة':'التالي ←'}</button>`;
+      el.querySelector('[data-n]').onclick=()=>{i++;draw()};
+    });
+  };
+  draw();
+}
+
+function gBudget(el,g){
+  const kindName={need:['حاجة',''],want:['رغبة','red'],save:['ادّخار','gold'],share:['مشاركة','blue']};
+  el.innerHTML=`<h3>${g.title}</h3><p class="instr">${C(g.instr)}</p>
+    <div class="score"><span class="chip">الدخل: ${g.income} ${CUR}</span><span class="chip gold" id="spent">المصروفات: 0</span><span class="chip" id="left">الباقي: ${g.income}</span></div>
+    <div class="bar" id="bar"><i style="width:0%"></i></div>
+    <div class="blist">${g.items.map(([pic,n,pr,k],i)=>`<div class="bitem"><input type="checkbox" id="bi${i}" data-i="${i}"><label for="bi${i}">${pic} ${n} <span class="chip ${kindName[k][1]}" style="font-size:.72rem">${kindName[k][0]}</span></label><span class="p">${pr} ${CUR}</span></div>`).join('')}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="chk">افحص ميزانيتي</button><button class="btn ghost" id="rst">ابدأ من جديد</button></div><div id="bfb"></div>`;
+  let rewarded=false;
+  const sel=()=>[...el.querySelectorAll('input:checked')].map(x=>g.items[+x.dataset.i]);
+  const upd=()=>{
+    const s=sel().reduce((a,x)=>a+x[2],0), left=g.income-s;
+    el.querySelector('#spent').textContent='المصروفات: '+s+' '+CUR;
+    el.querySelector('#left').textContent=(left>=0?'الباقي: ':'عجز: ')+Math.abs(left)+' '+CUR;
+    el.querySelector('#left').className='chip '+(left>=0?'':'red');
+    const bar=el.querySelector('#bar'); bar.classList.toggle('over',left<0); bar.querySelector('i').style.width=Math.min(100,s/g.income*100)+'%';
+  };
+  el.querySelectorAll('input').forEach(x=>x.onchange=upd);
+  el.querySelector('#rst').onclick=()=>gBudget(el,g);
+  el.querySelector('#chk').onclick=()=>{
+    const s=sel(), total=s.reduce((a,x)=>a+x[2],0), left=g.income-total;
+    const needs=g.items.filter(x=>x[3]==='need'), missing=needs.filter(n=>!s.includes(n)), saved=s.some(x=>x[3]==='save');
+    const msgs=[]; let ok=true;
+    if(left<0){ok=false;msgs.push(`عندك عجز ${-left} ${CUR}. احذف بعض الرغبات.`)}
+    if(missing.length){ok=false;msgs.push('نسيت حاجة مهمة: '+missing.map(m=>m[1]).join('، ')+'.')}
+    if(!saved){ok=false;msgs.push('لم تدّخر شيئًا لهدفك. تذكّر: ادّخر أولًا!')}
+    if(ok){msgs.push(`ميزانية ممتازة! غطّيت الحاجات وادّخرت${left>0?' وبقي معك فائض '+left+' '+CUR:''}.`);if(s.some(x=>x[3]==='share'))msgs.push('ورائع أنك فكّرت في صديقك أيضًا 🎁');if(!rewarded){rewarded=true;addCoins(5,'ميزانية ناجحة!')}}
+    el.querySelector('#bfb').innerHTML=`<div class="fb ${ok?'ok':'no'}" style="max-width:none">${msgs.join('<br>')}</div>`;
+  };
+}
+
+function gSavings(el,g){
+  el.innerHTML=`<h3>${g.title}</h3><p class="instr">${g.instr}</p>
+    <div class="box" style="display:grid;gap:12px"><b>1. اختر هدفك:</b><div class="choices" style="justify-content:flex-start">${g.goals.map(([p,n,pr],k)=>`<button class="btn ghost" data-g="${k}">${p} ${n} – ${pr} ${CUR}</button>`).join('')}</div>
+    <b>2. كم ستدّخر كل أسبوع؟</b><div class="choices" style="justify-content:flex-start">${g.weekly.map(w=>`<button class="btn ghost" data-w="${w}">${w} ${CUR}</button>`).join('')}</div>
+    <div><button class="btn" id="start" disabled>ابدأ الادخار</button></div></div>`;
+  let goal=null,weekly=null;
+  const ready=()=>el.querySelector('#start').disabled=!(goal&&weekly);
+  el.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{goal=g.goals[+b.dataset.g];el.querySelectorAll('[data-g]').forEach(x=>x.className='btn ghost');b.className='btn';ready()});
+  el.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{weekly=+b.dataset.w;el.querySelectorAll('[data-w]').forEach(x=>x.className='btn ghost');b.className='btn';ready()});
+  el.querySelector('#start').onclick=()=>run();
+  function run(){
+    let saved=0,week=0,spentOnTemptations=0; const log=[]; const ev=shuffle(g.events); const ideal=Math.ceil(goal[2]/weekly);
+    const draw=(event)=>{
+      const pct=Math.min(100,saved/goal[2]*100);
+      el.innerHTML=`<h3>${g.title}: ${goal[0]} ${goal[1]}</h3>
+        <div class="sim"><div class="sjar"><i style="height:${pct}%"></i><b>${saved} / ${goal[2]}</b></div>
+        <div style="display:grid;gap:12px;min-width:0"><div class="score"><span class="chip">الأسبوع: ${week}</span><span class="chip gold">ادّخرت: ${saved} ${CUR}</span><span class="chip blue">أدّخر أسبوعيًا: ${weekly} ${CUR}</span></div>
+        <div id="evbox"></div><div class="log">${log.slice().reverse().map(l=>`<span>${l}</span>`).join('')}</div></div></div>`;
+      const box=el.querySelector('#evbox');
+      if(saved>=goal[2]){
+        const msg = week<=ideal ? 'رائع! وصلت في أسرع وقت ممكن لأنك قاومت الإغراءات.' : `وصلت بعد ${week} أسابيع. لو قاومت الإغراءات لوصلت في ${ideal} أسابيع فقط، وكنت ستوفّر ${spentOnTemptations} ${CUR}.`;
+        box.innerHTML=`<div class="fb ok" style="max-width:none">🎉 مبروك! اشتريت ${goal[1]}. ${msg}</div><button class="btn" id="again">العب من جديد</button>`;
+        addCoins(5,'وصلت إلى هدفك!');
+        box.querySelector('#again').onclick=()=>gSavings(el,g);return;
+      }
+      if(!event){box.innerHTML=`<button class="btn gold" id="nw">الأسبوع التالي ←</button>`;box.querySelector('#nw').onclick=nextWeek;return}
+      if(event.cost){
+        box.innerHTML=`<div class="bigcard" style="padding:14px"><div class="pic" style="font-size:2.4rem">${event.pic}</div><p>${event.t} السعر: ${event.cost} ${CUR}. هل تشتري من مدّخراتك؟</p><div class="choices"><button class="btn red" id="buy">نعم، أشتري</button><button class="btn" id="skip">لا، أكمل الادخار</button></div></div>`;
+        box.querySelector('#buy').onclick=()=>{const c=Math.min(event.cost,saved);saved-=c;spentOnTemptations+=c;log.push(`الأسبوع ${week}: اشتريت (${event.pic}) بـ ${c} ${CUR}.`);draw(null)};
+        box.querySelector('#skip').onclick=()=>{log.push(`الأسبوع ${week}: قاومت الإغراء ${event.pic} 💪`);draw(null)};
+      } else {
+        if(event.gift){saved+=event.gift;log.push(`الأسبوع ${week}: ${event.t} +${event.gift} ${CUR}`)} else log.push(`الأسبوع ${week}: ${event.t}`);
+        draw(null);
+      }
+    };
+    function nextWeek(){week++;saved+=weekly;log.push(`الأسبوع ${week}: وضعت ${weekly} ${CUR} في الحصّالة.`);draw(ev[(week-1)%ev.length])}
+    draw(null);
+  }
+}
+
+function gMemory(el){
+  const all=LESSONS.flatMap(l=>l.terms); const pick=shuffle(all).slice(0,6);
+  const cards=shuffle(pick.flatMap((p,k)=>[{k,t:p[0],term:true},{k,t:C(p[1]),term:false}]));
+  let open=[],found=0,tries=0,lock=false;
+  el.innerHTML=`<h3>لعبة الذاكرة: المصطلح ومعناه</h3><p class="instr">اقلب بطاقتين: ابحث عن المصطلح ومعناه.</p><div class="score"><span class="chip" id="mt">المحاولات: 0</span><span class="chip gold" id="mf">الأزواج: 0 / 6</span></div><div class="mem">${cards.map((c,i)=>`<button class="mcard" data-i="${i}" aria-label="بطاقة ${i+1}">؟</button>`).join('')}</div><div><button class="btn ghost" data-r>لعبة جديدة</button></div>`;
+  el.querySelector('[data-r]').onclick=()=>gMemory(el);
+  el.querySelectorAll('.mcard').forEach(b=>b.onclick=()=>{
+    const c=cards[+b.dataset.i]; if(lock||b.classList.contains('open')||b.classList.contains('got'))return;
+    b.classList.add('open');if(c.term)b.classList.add('t');b.textContent=c.t;open.push([b,c]);
+    if(open.length===2){tries++;el.querySelector('#mt').textContent='المحاولات: '+tries;
+      const [[b1,c1],[b2,c2]]=open;
+      if(c1.k===c2.k){[b1,b2].forEach(x=>{x.classList.remove('open');x.classList.add('got')});found++;open=[];el.querySelector('#mf').textContent='الأزواج: '+found+' / 6';
+        if(found===6)addCoins(5,'وجدت كل الأزواج!')}
+      else{lock=true;setTimeout(()=>{[b1,b2].forEach(x=>{x.classList.remove('open','t');x.textContent='؟'});open=[];lock=false},1100)}
+    }
+  });
+}
+
+/* ======================= الصفحات العامة ======================= */
+function renderGlossary(v){
+  const all=LESSONS.flatMap(l=>l.terms.map(t=>[t[0],t[1],l.id]));
+  v.innerHTML=`<div><h2>قاموس الإدارة المالية</h2><p style="color:var(--muted)">كل مصطلحات السلسلة في مكان واحد. اكتب كلمة للبحث.</p></div>
+    <input id="q" type="search" placeholder="ابحث عن مصطلح…" aria-label="بحث في القاموس" style="width:100%;max-width:420px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit">
+    <div class="gloss" id="gl"></div>`;
+  const draw=q=>{v.querySelector('#gl').innerHTML=all.filter(t=>!q||t[0].includes(q)||t[1].includes(q)).map(([t,d,l])=>`<div class="g"><b>${t}</b><span>${C(d)}</span><span class="chip">الدرس ${l}</span></div>`).join('')||'<p>لا يوجد مصطلح بهذا الاسم. جرّب كلمة أخرى.</p>'};
+  v.querySelector('#q').oninput=e=>draw(e.target.value.trim()); draw('');
+}
+
+function renderArcade(v){
+  v.innerHTML=`<div><h2>ساحة الألعاب</h2><p style="color:var(--muted)">ألعاب تراجع كل الدروس. مناسبة لنهاية الوحدة أو لحصة مراجعة.</p></div>
+    <div class="box game" id="am"></div><div class="box game" id="aq"></div>
+    <div class="box"><h3>كل ألعاب الدروس</h3><div class="pool" style="margin-top:8px">${LESSONS.flatMap(l=>l.games.map(g=>`<button class="tile" data-l="${l.id}">الدرس ${l.id}: ${g.title}</button>`)).join('')}</div></div>`;
+  gMemory(v.querySelector('#am'));
+  gQuiz(v.querySelector('#aq'),{title:'تحدّي الحصّالة الذهبية: المسابقة الختامية',instr:'12 سؤالًا من كل الدروس.',qs:FINAL_QUIZ});
+  v.querySelectorAll('[data-l]').forEach(b=>b.onclick=()=>go('lesson',+b.dataset.l,'games'));
+}
+
+function renderFinal(v){
+  v.innerHTML=`<div class="lhead"><span class="lnum" style="background:var(--mint);border-color:var(--ink);color:var(--on-accent)">★</span><div><h2>${FINAL.title}</h2><p>${FINAL.intro}</p></div></div>
+    <div class="box"><h3>مراحل المشروع</h3><div class="tw"><table class="plan"><thead><tr><th>المرحلة</th><th>ماذا نفعل؟</th></tr></thead><tbody>${FINAL.steps.map(([a,b])=>`<tr><td><b>${a}</b></td><td>${b}</td></tr>`).join('')}</tbody></table></div></div>
+    <div class="box"><h3>سلّم التقييم (روبريك)</h3><div class="tw"><table class="plan"><thead><tr><th>المعيار</th><th>بداية ⭐</th><th>جيد ⭐⭐</th><th>متميّز ⭐⭐⭐</th></tr></thead><tbody>${FINAL.rubric.map(r=>`<tr>${r.map((c,k)=>`<td>${k?c:'<b>'+c+'</b>'}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>
+    <div class="box"><h3>بطاقة المجموعة</h3><div class="tw"><table class="plan"><thead><tr><th>المنتج</th><th>التكلفة</th><th>سعر البيع</th><th>عدد القطع المباعة</th><th>الدخل</th><th>الربح</th><th>أدّخر / أصرف / أشارك</th></tr></thead><tbody><tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody></table></div></div>`;
+}
+
+function renderGuide(v){
+  v.innerHTML=`<div><h2>دليل المعلّم</h2><p style="color:var(--muted);max-width:70ch">السلسلة مبنية لست حصص (45 دقيقة لكل حصة) ومشروع ختامي على مدى ثلاثة أسابيع. يمكن تقسيم كل درس إلى حصتين إذا رغبت بالتوسّع في الفعالية.</p></div>
+    <div class="box"><h3>مبنى الحصة المقترح</h3><div class="tw"><table class="plan"><thead><tr><th>الوقت</th><th>المرحلة</th><th>الأداة في الموقع</th></tr></thead><tbody>
+      <tr><td>5 د</td><td>افتتاحية: سؤال مثير أو حزّورة</td><td>الشريحة الأولى في العارضة / الحزازير</td></tr>
+      <tr><td>10 د</td><td>عرض المفاهيم والمصطلحات</td><td>العارضة + بطاقات المصطلحات</td></tr>
+      <tr><td>15 د</td><td>فعالية جماعية</td><td>صفحة الفعالية</td></tr>
+      <tr><td>8 د</td><td>لعبة تفاعلية على اللوح الذكي (فرق)</td><td>الألعاب</td></tr>
+      <tr><td>7 د</td><td>ورقة عمل وتلخيص</td><td>ورقة العمل (أو واجب بيتي)</td></tr>
+    </tbody></table></div></div>
+    <div class="box"><h3>خريطة السلسلة</h3><div class="tw"><table class="plan"><thead><tr><th>الدرس</th><th>الفكرة المركزية</th><th>الفعالية</th><th>الألعاب</th><th>المصطلحات</th></tr></thead><tbody>
+      ${LESSONS.map(l=>`<tr><td><b>${l.id}. ${l.title}</b></td><td>${l.sub}</td><td>${l.activity.name}</td><td>${l.games.map(g=>g.title).join('<br>')}</td><td>${l.terms.map(t=>t[0]).join('، ')}</td></tr>`).join('')}
+      <tr><td><b>★ الختام</b></td><td>تطبيق كل المفاهيم</td><td>سوق الصف الصغير</td><td>الذاكرة + المسابقة الختامية</td><td>مراجعة شاملة</td></tr>
+    </tbody></table></div></div>
+    <div class="cols">
+      <div class="box"><h3>مواد عامة يُفضّل تحضيرها</h3><ul class="goals">
+        <li>نقود ورقية ومعدنية للعب (بلاستيك أو مطبوعة).</li><li>حصّالة شفافة للصف لمتابعة "هدف صفّي" مشترك.</li><li>ثلاثة مرطبانات معنونة: أدّخر / أصرف / أشارك.</li><li>منشورات إعلانية حقيقية من المتاجر.</li><li>علب منتجات فارغة ونظيفة لزاوية الدكان.</li><li>لوح ذكي أو جهاز عرض لتشغيل العارضات والألعاب.</li>
+      </ul></div>
+      <div class="box"><h3>نصائح لتدريس شيّق</h3><ul class="goals">
+        <li>ابدأ كل حصة بحزّورة، واجعل الطلاب يخترعون حزّورة في نهاية الحصة.</li><li>قسّم الصف إلى "بنوك" (فرق) تجمع القطع الذهبية طوال الوحدة.</li><li>اربط كل مسألة بأسعار حقيقية من محيط الطلاب.</li><li>شجّع الحوار مع الأهل: مقابلة، ميزانية بيت مبسّطة، رحلة إلى الدكان.</li><li>تجنّب الحديث عن دخل عائلات بعينها، وركّز على المبادئ.</li>
+      </ul></div>
+    </div>
+    <div class="box"><h3>ملاحظات</h3><ul class="goals"><li>يمكن تغيير العملة من أعلى الصفحة، فتتغيّر في كل الدروس والأوراق والألعاب.</li><li>القطع الذهبية تُحفظ في هذا المتصفّح فقط، وهي للتحفيز وليست علامة.</li><li>أوراق العمل مرفقة بمفتاح إجابات يظهر بزر "إظهار مفتاح الإجابات".</li></ul></div>`;
+}
+
+/* ======================= تشغيل ======================= */
+$('#coins').textContent=COINS;
+const cs=$('#curSel'); cs.value=CUR; cs.onchange=()=>{CUR=cs.value;store.set('cur',CUR);render()};
+$('#homeBtn').onclick=()=>go('home');
+parseHash(); render();
+</script>
+</body>
+</html>
