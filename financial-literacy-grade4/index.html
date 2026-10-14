@@ -94,13 +94,14 @@ main .wrap{padding-block:24px 64px;display:grid;gap:24px}
 
 /* flip cards */
 .terms{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
-.flip{perspective:900px;border:0;background:none;padding:0;min-height:150px;text-align:center}
-.flip .in{position:relative;width:100%;height:100%;min-height:150px;transition:transform .5s;transform-style:preserve-3d}
+.flip{display:block;width:100%;perspective:900px;border:0;background:none;padding:0;text-align:center;color:inherit}
+.flip span{display:block}
+.flip .in{display:grid;width:100%;min-height:150px;transition:transform .5s;transform-style:preserve-3d}
 .flip.on .in{transform:rotateY(180deg)}
-.flip .f,.flip .b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--r);display:grid;place-items:center;padding:14px}
+.flip .f,.flip .b{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--r);display:grid;place-items:center;padding:14px}
 .flip .f{background:var(--mint-soft);border:2px dashed var(--mint)}
 .flip .f strong{font-family:var(--f-display);font-size:1.6rem;font-weight:400;display:block}
-.flip .f span{font-size:.75rem;color:var(--muted)}
+.flip .f small{display:block;font-size:.75rem;color:var(--muted)}
 .flip .b{background:var(--card);border:2px solid var(--coin);transform:rotateY(180deg);font-size:.92rem;line-height:1.6}
 
 /* slides */
@@ -714,7 +715,7 @@ function pTerms(p,L){
   p.innerHTML = `
     <div class="box"><h3>أهداف الدرس</h3><ul class="goals">${L.goals.map(g=>`<li>${g}</li>`).join('')}</ul></div>
     <div><h3 style="margin-bottom:10px">بطاقات المصطلحات <span class="chip">اضغط على البطاقة لقلبها</span></h3>
-    <div class="terms">${L.terms.map(([t,d])=>`<button class="flip"><span class="in"><span class="f"><span><strong>${t}</strong><span>ما معناي؟</span></span></span><span class="b">${C(d)}</span></span></button>`).join('')}</div></div>`;
+    <div class="terms">${L.terms.map(([t,d])=>`<button class="flip"><span class="in"><span class="f"><span><strong>${t}</strong><small>ما معناي؟</small></span></span><span class="b">${C(d)}</span></span></button>`).join('')}</div></div>`;
   p.querySelectorAll('.flip').forEach(f=>f.onclick=()=>f.classList.toggle('on'));
 }
 
